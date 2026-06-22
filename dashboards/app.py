@@ -13,7 +13,7 @@ st.set_page_config(page_title="DataFlowX | Enterprise Dashboard", layout="wide",
 # Database connection
 @st.cache_resource
 def get_db_connection():
-    db_dialect = os.getenv("DB_DIALECT", "mysql").lower()
+    db_dialect = os.getenv("DB_DIALECT", "sqlite").lower()
     if db_dialect == "sqlite":
         return create_engine("sqlite:///dataflowx.db")
     else:

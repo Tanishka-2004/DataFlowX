@@ -1,4 +1,16 @@
+---
+title: DataFlowX
+emoji: 📊
+colorFrom: blue
+colorTo: indigo
+sdk: streamlit
+sdk_version: 1.35.0
+app_file: dashboards/app.py
+pinned: false
+---
+
 # DataFlowX - Enterprise Data Platform
+
 
 DataFlowX is a complete, production-grade enterprise data platform designed using the **Medallion Architecture** (Bronze, Silver, Gold). It ingests data from mock enterprise systems (ERP, CRM, POS), validates it using a custom Data Quality framework, transforms it, and loads it into a Star Schema Data Warehouse.
 
