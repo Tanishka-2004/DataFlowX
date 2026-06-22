@@ -59,7 +59,7 @@ class DatasetRegistry(Base):
 
 class MetadataTracker:
     def __init__(self):
-        db_dialect = os.getenv("DB_DIALECT", "mysql").lower()
+        db_dialect = os.getenv("DB_DIALECT", "sqlite").lower()
         if db_dialect == "sqlite":
             self.engine = create_engine("sqlite:///dataflowx.db")
         else:

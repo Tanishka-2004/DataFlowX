@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def get_connection():
-    db_dialect = os.getenv("DB_DIALECT", "mysql").lower()
+    db_dialect = os.getenv("DB_DIALECT", "sqlite").lower()
     if db_dialect == "sqlite":
         return create_engine("sqlite:///dataflowx.db")
     

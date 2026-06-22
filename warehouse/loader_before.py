@@ -11,7 +11,7 @@ load_dotenv()
 class WarehouseLoader:
     def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
-        db_dialect = os.getenv("DB_DIALECT", "mysql").lower()
+        db_dialect = os.getenv("DB_DIALECT", "sqlite").lower()
         
         if db_dialect == "sqlite":
             self.engine = create_engine("sqlite:///dataflowx.db")
