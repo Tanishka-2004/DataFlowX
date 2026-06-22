@@ -104,7 +104,8 @@ def extract_and_load_bronze(**kwargs):
         
         # Log lineage
         bronze_dest = f"bronze/{src}/{src}_raw.csv"
-        lineage.log_lineage(run_id, source_dataset=src, bronze_path=bronze_dest)
+        source_file = os.getenv(f"CURRENT_SOURCE_FILE_{src}")
+        lineage.log_lineage(run_id, source_dataset=src, bronze_path=bronze_dest, source_file_name=source_file)
         
     tracker.update_run(run_id, rows_processed=total_processed)
 
@@ -230,20 +231,24 @@ def transform_to_silver(**kwargs):
     
     for dataset in datasets:
         cleaner.process_and_save_silver(dataset)
+        source_file = os.getenv(f"CURRENT_SOURCE_FILE_{dataset}")
         lineage.log_lineage(
             run_id=run_id,
             source_dataset=dataset,
             bronze_path=f"bronze/{dataset}/{dataset}_raw.csv",
-            silver_path=f"silver/{dataset}/{dataset}_clean.csv"
+            silver_path=f"silver/{dataset}/{dataset}_clean.csv",
+            source_file_name=source_file
         )
         
     # Clean inventory
     inv_cleaner.process_and_save_silver()
+    source_file_inv = os.getenv("CURRENT_SOURCE_FILE_inventory")
     lineage.log_lineage(
         run_id=run_id,
         source_dataset="inventory",
         bronze_path="bronze/inventory/inventory_raw.csv",
-        silver_path="silver/inventory/inventory_clean.csv"
+        silver_path="silver/inventory/inventory_clean.csv",
+        source_file_name=source_file_inv
     )
 
 def feature_engineer_to_gold(**kwargs):
@@ -254,26 +259,32 @@ def feature_engineer_to_gold(**kwargs):
     
     # Process core metrics
     builder.process_and_save_gold()
+    source_file_cust = os.getenv("CURRENT_SOURCE_FILE_crm_customers")
     lineage.log_lineage(
         run_id=run_id,
         source_dataset="customer_metrics",
         silver_path="silver/crm_customers/crm_customers_clean.csv",
-        gold_path="gold/customer_metrics/customer_metrics.csv"
+        gold_path="gold/customer_metrics/customer_metrics.csv",
+        source_file_name=source_file_cust
     )
+    source_file_sales = os.getenv("CURRENT_SOURCE_FILE_pos_transactions")
     lineage.log_lineage(
         run_id=run_id,
         source_dataset="sales_metrics",
         silver_path="silver/pos_transactions/pos_transactions_clean.csv",
-        gold_path="gold/sales_metrics/sales_metrics.csv"
+        gold_path="gold/sales_metrics/sales_metrics.csv",
+        source_file_name=source_file_sales
     )
     
     # Process inventory metrics
     inv_builder.process_and_save_gold()
+    source_file_inv = os.getenv("CURRENT_SOURCE_FILE_inventory")
     lineage.log_lineage(
         run_id=run_id,
         source_dataset="inventory_metrics",
         silver_path="silver/inventory/inventory_clean.csv",
-        gold_path="gold/inventory_metrics/inventory_metrics.csv"
+        gold_path="gold/inventory_metrics/inventory_metrics.csv",
+        source_file_name=source_file_inv
     )
 
 def load_data_warehouse(**kwargs):

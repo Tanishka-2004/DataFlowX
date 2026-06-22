@@ -15,6 +15,7 @@ class DataLineage(Base):
     lineage_id = Column(Integer, primary_key=True, autoincrement=True)
     run_id = Column(String(50))
     source_dataset = Column(String(100))
+    source_file_name = Column(String(255), nullable=True)
     bronze_path = Column(String(255))
     silver_path = Column(String(255))
     gold_path = Column(String(255))
@@ -38,13 +39,14 @@ class LineageTracker:
         Base.metadata.create_all(self.engine)
         self.Session = sessionmaker(bind=self.engine)
 
-    def log_lineage(self, run_id: str, source_dataset: str, bronze_path: str = None, silver_path: str = None, gold_path: str = None):
+    def log_lineage(self, run_id: str, source_dataset: str, bronze_path: str = None, silver_path: str = None, gold_path: str = None, source_file_name: str = None):
         """Logs a data lineage record for a given run and source dataset."""
         session = self.Session()
         try:
             lineage = DataLineage(
                 run_id=run_id,
                 source_dataset=source_dataset,
+                source_file_name=source_file_name,
                 bronze_path=bronze_path,
                 silver_path=silver_path,
                 gold_path=gold_path,

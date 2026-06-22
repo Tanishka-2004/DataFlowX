@@ -39,6 +39,9 @@ class DatasetRegistry(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     dataset_name = Column(String(255), unique=True)
+    original_filename = Column(String(255), nullable=True)
+    source_file_name = Column(String(255), nullable=True)
+    source_dataset_type = Column(String(100), nullable=True)
     detected_type = Column(String(100))
     status = Column(String(50))
     rows_count = Column(Integer, default=0)
@@ -74,7 +77,42 @@ class MetadataTracker:
                 conn.execute(text("SELECT 1"))
                 
         Base.metadata.create_all(self.engine)
+        self.ensure_columns_exist()
         self.Session = sessionmaker(bind=self.engine)
+
+    def ensure_columns_exist(self):
+        from sqlalchemy import inspect
+        inspector = inspect(self.engine)
+        
+        # Check dataset_registry columns
+        if 'dataset_registry' in inspector.get_table_names():
+            columns = [c['name'] for c in inspector.get_columns('dataset_registry')]
+            with self.engine.begin() as conn:
+                if 'original_filename' not in columns:
+                    try:
+                        conn.execute(text("ALTER TABLE dataset_registry ADD COLUMN original_filename VARCHAR(255)"))
+                    except Exception:
+                        pass
+                if 'source_file_name' not in columns:
+                    try:
+                        conn.execute(text("ALTER TABLE dataset_registry ADD COLUMN source_file_name VARCHAR(255)"))
+                    except Exception:
+                        pass
+                if 'source_dataset_type' not in columns:
+                    try:
+                        conn.execute(text("ALTER TABLE dataset_registry ADD COLUMN source_dataset_type VARCHAR(100)"))
+                    except Exception:
+                        pass
+                        
+        # Check data_lineage columns
+        if 'data_lineage' in inspector.get_table_names():
+            columns = [c['name'] for c in inspector.get_columns('data_lineage')]
+            with self.engine.begin() as conn:
+                if 'source_file_name' not in columns:
+                    try:
+                        conn.execute(text("ALTER TABLE data_lineage ADD COLUMN source_file_name VARCHAR(255)"))
+                    except Exception:
+                        pass
 
     def start_run(self, run_id: str):
         session = self.Session()
@@ -123,7 +161,7 @@ class MetadataTracker:
         finally:
             session.close()
 
-    def register_dataset(self, name, dtype, status, rows, cols, schema_def, q_score, comp_score, val_score, uniq_score, cons_score, q_details, conf_score, det_signals, user="anonymous", run_id=None):
+    def register_dataset(self, name, dtype, status, rows, cols, schema_def, q_score, comp_score, val_score, uniq_score, cons_score, q_details, conf_score, det_signals, user="anonymous", run_id=None, original_filename=None, source_file_name=None, source_dataset_type=None):
         session = self.Session()
         try:
             existing = session.query(DatasetRegistry).filter_by(dataset_name=name).first()
@@ -152,6 +190,12 @@ class MetadataTracker:
                 existing.upload_timestamp = datetime.utcnow()
                 existing.upload_user = user
                 existing.last_run_id = run_id
+                if original_filename:
+                    existing.original_filename = original_filename
+                if source_file_name:
+                    existing.source_file_name = source_file_name
+                if source_dataset_type:
+                    existing.source_dataset_type = source_dataset_type
             else:
                 new_ds = DatasetRegistry(
                     dataset_name=name,
@@ -169,7 +213,10 @@ class MetadataTracker:
                     confidence_score=conf_score,
                     detection_signals=det_signals,
                     upload_user=user,
-                    last_run_id=run_id
+                    last_run_id=run_id,
+                    original_filename=original_filename,
+                    source_file_name=source_file_name,
+                    source_dataset_type=source_dataset_type
                 )
                 session.add(new_ds)
             session.commit()
