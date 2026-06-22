@@ -1,9 +1,13 @@
 import streamlit as st
 import pandas as pd
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 import plotly.express as px
 import os
+import sys
+import time
 from dotenv import load_dotenv
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 load_dotenv()
 
@@ -28,7 +32,8 @@ def get_db_connection():
 def load_data(query: str):
     engine = get_db_connection()
     try:
-        return pd.read_sql(query, engine)
+        with engine.connect() as conn:
+            return pd.read_sql(query, conn)
     except Exception as e:
         st.error(f"Failed to load data: {e}")
         return pd.DataFrame()
@@ -39,7 +44,7 @@ st.markdown("---")
 
 # Sidebar Navigation
 st.sidebar.header("Navigation")
-dashboard_selection = st.sidebar.radio("Select Dashboard:", ["Sales Analytics", "Customer Analytics", "Inventory Analytics"])
+dashboard_selection = st.sidebar.radio("Select Dashboard:", ["Sales Analytics", "Customer Analytics", "Inventory Analytics", "Upload Data & Pipeline"])
 
 if dashboard_selection == "Sales Analytics":
     st.header("📈 Sales Analytics Dashboard")
@@ -214,3 +219,302 @@ elif dashboard_selection == "Inventory Analytics":
             st.warning("No records match the selected filters.")
     else:
         st.info("No inventory analytics data is currently available in the warehouse. Run the pipeline first.")
+
+elif dashboard_selection == "Upload Data & Pipeline":
+    st.header("📥 Data Ingestion & Medallion Pipeline")
+    st.markdown("""
+    This control panel allows you to upload custom CSV datasets and run the full **Medallion Data Platform Pipeline** (Bronze ➔ Silver ➔ Gold ➔ SQLite Data Warehouse) locally inside the container.
+    """)
+    
+    # 1. File Uploaders
+    st.subheader("1. Upload Custom Datasets")
+    st.info("Upload CSV files to replace the default source datasets.")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        uploaded_customers = st.file_uploader("Upload crm_customers.csv", type=["csv"])
+        uploaded_products = st.file_uploader("Upload products.csv", type=["csv"])
+        uploaded_orders = st.file_uploader("Upload erp_orders.csv", type=["csv"])
+        
+    with col2:
+        uploaded_transactions = st.file_uploader("Upload pos_transactions.csv", type=["csv"])
+        uploaded_inventory = st.file_uploader("Upload inventory.csv", type=["csv"])
+        
+    for uploaded_file, filename in [
+        (uploaded_customers, "crm_customers.csv"),
+        (uploaded_products, "products.csv"),
+        (uploaded_orders, "erp_orders.csv"),
+        (uploaded_transactions, "pos_transactions.csv"),
+        (uploaded_inventory, "inventory.csv")
+    ]:
+        if uploaded_file is not None:
+            df_up = pd.read_csv(uploaded_file)
+            df_up.to_csv(filename, index=False)
+            os.makedirs("data", exist_ok=True)
+            df_up.to_csv(os.path.join("data", filename), index=False)
+            st.success(f"Successfully uploaded and saved `{filename}` ({len(df_up)} rows).")
+
+    # 2. Pipeline Controls
+    st.markdown("---")
+    st.subheader("2. Run Medallion ETL Pipeline")
+    
+    run_mode = st.radio("Pipeline Load Mode:", ["Incremental Load (Append new data)", "Full Rebuild (Wipe warehouse & reload all data)"])
+    
+    col_btn1, col_btn2 = st.columns(2)
+    with col_btn1:
+        run_pipeline_btn = st.button("🚀 Run Pipeline", use_container_width=True)
+    with col_btn2:
+        reset_demo_btn = st.button("🔄 Reset to Default Demo Data", use_container_width=True)
+        
+    if run_pipeline_btn:
+        st.write("### Pipeline Progress")
+        
+        if run_mode == "Full Rebuild (Wipe warehouse & reload all data)":
+            with st.spinner("Cleaning up data lake storage and database..."):
+                import shutil
+                for layer in ["bronze", "silver", "gold"]:
+                    lake_path = os.path.join("data_lake", layer)
+                    if os.path.exists(lake_path):
+                        shutil.rmtree(lake_path)
+                os.makedirs("data_lake", exist_ok=True)
+                
+                try:
+                    engine = get_db_connection()
+                    with engine.begin() as conn:
+                        tables = [
+                            "fact_sales", "fact_orders", 
+                            "gold_sales_metrics", "gold_customer_metrics", "gold_inventory_metrics",
+                            "dim_customer", "dim_product", "dim_store", "dim_date",
+                            "pipeline_runs", "data_lineage", "pipeline_watermarks"
+                        ]
+                        for table in tables:
+                            try:
+                                conn.execute(text(f"DROP TABLE IF EXISTS {table}"))
+                            except Exception:
+                                pass
+                    st.success("Successfully cleaned warehouse tables and data lake!")
+                except Exception as ex:
+                    st.error(f"Cleanup warning: {ex}")
+        
+        status_text = st.empty()
+        progress_bar = st.progress(0)
+        run_id = f"manual__streamlit_{int(time.time())}"
+        
+        try:
+            from metadata.tracker import MetadataTracker
+            from metadata.lineage_tracker import LineageTracker
+            from ingestion.csv_loader import CSVLoader
+            from quality.validator import DataValidator
+            from transformations.cleaner import DataCleaner
+            from transformations.inventory_cleaner import InventoryCleaner
+            from feature_engineering.builder import FeatureBuilder
+            from feature_engineering.inventory_metrics import InventoryMetricsBuilder
+            from warehouse.loader import WarehouseLoader
+            from metadata.watermarks import WatermarkManager
+            from datetime import datetime
+            
+            tracker = MetadataTracker()
+            tracker.start_run(run_id)
+            lineage = LineageTracker()
+            
+            if run_mode == "Full Rebuild (Wipe warehouse & reload all data)":
+                wm = WatermarkManager()
+                for src in ["erp_orders", "crm_customers", "pos_transactions", "products", "inventory"]:
+                    wm.update_watermark(src, datetime(2000, 1, 1))
+
+            # Step 1: Ingestion
+            status_text.text("Step 1/5: Ingesting raw CSV files to Bronze Layer...")
+            progress_bar.progress(10)
+            loader = CSVLoader()
+            sources = [
+                ("erp_orders", "erp_orders.csv", "order_date"),
+                ("crm_customers", "crm_customers.csv", "signup_date"),
+                ("pos_transactions", "pos_transactions.csv", "timestamp"),
+                ("products", "products.csv", None),
+                ("inventory", "inventory.csv", "last_restock_date")
+            ]
+            total_processed = 0
+            for src, file, dt_col in sources:
+                df = loader.load_incremental(src, file, dt_col)
+                loader.save_to_bronze(df, src)
+                total_processed += len(df)
+                bronze_dest = f"bronze/{src}/{src}_raw.csv"
+                lineage.log_lineage(run_id, source_dataset=src, bronze_path=bronze_dest)
+                
+            tracker.update_run(run_id, rows_processed=total_processed)
+            
+            # Step 2: Quality Validation
+            status_text.text("Step 2/5: Validating data quality rules...")
+            progress_bar.progress(30)
+            validator = DataValidator()
+            schema_definitions = {
+                "crm_customers": ["customer_id", "customer_name", "segment", "acquisition_channel", "signup_date"],
+                "products": ["product_id", "product_name", "category", "unit_price"],
+                "erp_orders": ["order_id", "customer_id", "product_id", "quantity", "order_date", "region", "unit_price"],
+                "pos_transactions": ["transaction_id", "store_id", "product_id", "quantity", "timestamp", "sale_amount"],
+                "inventory": ["store_id", "product_id", "stock_level", "reorder_point", "last_restock_date"]
+            }
+            datasets = ["crm_customers", "products", "erp_orders", "pos_transactions", "inventory"]
+            for dataset in datasets:
+                local_temp = f"temp_validate_{dataset}.csv"
+                from storage.s3_manager import StorageManager
+                storage = StorageManager()
+                if storage.download_file(f"bronze/{dataset}/{dataset}_raw.csv", local_temp):
+                    df_val = pd.read_csv(local_temp)
+                    expected_cols = schema_definitions[dataset]
+                    validator.expect_table_columns_to_match(df_val, expected_cols, dataset)
+                    if dataset == "crm_customers":
+                        validator.expect_column_values_to_not_be_null(df_val, "customer_id", dataset)
+                        validator.expect_column_values_to_be_unique(df_val, "customer_id", dataset)
+                    elif dataset == "products":
+                        validator.expect_column_values_to_not_be_null(df_val, "product_id", dataset)
+                        validator.expect_column_values_to_be_unique(df_val, "product_id", dataset)
+                    elif dataset == "erp_orders":
+                        validator.expect_column_values_to_not_be_null(df_val, "order_id", dataset)
+                        validator.expect_column_values_to_be_unique(df_val, "order_id", dataset)
+                    elif dataset == "pos_transactions":
+                        validator.expect_column_values_to_not_be_null(df_val, "transaction_id", dataset)
+                        validator.expect_column_values_to_be_unique(df_val, "transaction_id", dataset)
+                    elif dataset == "inventory":
+                        validator.expect_column_values_to_not_be_null(df_val, "store_id", dataset)
+                        validator.expect_column_values_to_not_be_null(df_val, "product_id", dataset)
+                    os.remove(local_temp)
+                    
+            # Step 3: Clean to Silver
+            status_text.text("Step 3/5: Cleaning data to Silver Layer...")
+            progress_bar.progress(50)
+            cleaner = DataCleaner()
+            for dataset in ["crm_customers", "products", "erp_orders", "pos_transactions"]:
+                cleaner.clean_dataset(dataset)
+                silver_dest = f"silver/{dataset}/{dataset}_clean.csv"
+                lineage.log_lineage(run_id, source_dataset=dataset, silver_path=silver_dest)
+                
+            inv_cleaner = InventoryCleaner()
+            inv_cleaner.clean_inventory()
+            lineage.log_lineage(run_id, source_dataset="inventory", silver_path="silver/inventory/inventory_clean.csv")
+            
+            # Step 4: Feature Engineer to Gold
+            status_text.text("Step 4/5: Engineering business metrics to Gold Layer...")
+            progress_bar.progress(70)
+            builder = FeatureBuilder()
+            builder.build_customer_metrics()
+            lineage.log_lineage(run_id, source_dataset="customer_metrics", gold_path="gold/customer_metrics/customer_metrics.csv")
+            builder.build_sales_metrics()
+            lineage.log_lineage(run_id, source_dataset="sales_metrics", gold_path="gold/sales_metrics/sales_metrics.csv")
+            
+            inv_builder = InventoryMetricsBuilder()
+            inv_builder.build_inventory_metrics()
+            lineage.log_lineage(run_id, source_dataset="inventory_metrics", gold_path="gold/inventory_metrics/inventory_metrics.csv")
+            
+            # Step 5: Load to Star Schema Data Warehouse
+            status_text.text("Step 5/5: Loading Gold metrics to Star Schema Data Warehouse...")
+            progress_bar.progress(90)
+            wh_loader = WarehouseLoader()
+            wh_loader.load_dimensions()
+            wh_loader.load_facts()
+            
+            tracker.complete_run(run_id, status="COMPLETED")
+            status_text.text("ETL Pipeline completed successfully! All data loaded to warehouse.")
+            progress_bar.progress(100)
+            st.success(f"Pipeline Run `{run_id}` finished successfully! The database is now updated.")
+            
+        except Exception as e:
+            try:
+                tracker.complete_run(run_id, status="FAILED", error_message=str(e)[:400])
+            except Exception:
+                pass
+            status_text.text(f"Pipeline failed: {e}")
+            progress_bar.progress(100)
+            st.error(f"ETL Pipeline execution failed: {e}")
+
+    if reset_demo_btn:
+        with st.spinner("Generating fresh default mock data and rebuilding warehouse..."):
+            try:
+                from data.generate_mock_data import generate_mock_data
+                generate_mock_data()
+                
+                import shutil
+                for layer in ["bronze", "silver", "gold"]:
+                    lake_path = os.path.join("data_lake", layer)
+                    if os.path.exists(lake_path):
+                        shutil.rmtree(lake_path)
+                os.makedirs("data_lake", exist_ok=True)
+                
+                engine = get_db_connection()
+                with engine.begin() as conn:
+                    tables = [
+                        "fact_sales", "fact_orders", 
+                        "gold_sales_metrics", "gold_customer_metrics", "gold_inventory_metrics",
+                        "dim_customer", "dim_product", "dim_store", "dim_date",
+                        "pipeline_runs", "data_lineage", "pipeline_watermarks"
+                    ]
+                    for table in tables:
+                        try:
+                            conn.execute(text(f"DROP TABLE IF EXISTS {table}"))
+                        except Exception:
+                            pass
+                
+                from metadata.tracker import MetadataTracker
+                from metadata.lineage_tracker import LineageTracker
+                from ingestion.csv_loader import CSVLoader
+                from quality.validator import DataValidator
+                from transformations.cleaner import DataCleaner
+                from transformations.inventory_cleaner import InventoryCleaner
+                from feature_engineering.builder import FeatureBuilder
+                from feature_engineering.inventory_metrics import InventoryMetricsBuilder
+                from warehouse.loader import WarehouseLoader
+                from metadata.watermarks import WatermarkManager
+                from datetime import datetime
+                
+                run_id = f"manual__reset_{int(time.time())}"
+                tracker = MetadataTracker()
+                tracker.start_run(run_id)
+                lineage = LineageTracker()
+                
+                wm = WatermarkManager()
+                for src in ["erp_orders", "crm_customers", "pos_transactions", "products", "inventory"]:
+                    wm.update_watermark(src, datetime(2000, 1, 1))
+                
+                loader = CSVLoader()
+                sources = [
+                    ("erp_orders", "erp_orders.csv", "order_date"),
+                    ("crm_customers", "crm_customers.csv", "signup_date"),
+                    ("pos_transactions", "pos_transactions.csv", "timestamp"),
+                    ("products", "products.csv", None),
+                    ("inventory", "inventory.csv", "last_restock_date")
+                ]
+                total_processed = 0
+                for src, file, dt_col in sources:
+                    df = loader.load_incremental(src, file, dt_col)
+                    loader.save_to_bronze(df, src)
+                    total_processed += len(df)
+                    lineage.log_lineage(run_id, source_dataset=src, bronze_path=f"bronze/{src}/{src}_raw.csv")
+                tracker.update_run(run_id, rows_processed=total_processed)
+                
+                validator = DataValidator()
+                cleaner = DataCleaner()
+                for dataset in ["crm_customers", "products", "erp_orders", "pos_transactions"]:
+                    cleaner.clean_dataset(dataset)
+                    lineage.log_lineage(run_id, source_dataset=dataset, silver_path=f"silver/{dataset}/{dataset}_clean.csv")
+                inv_cleaner = InventoryCleaner()
+                inv_cleaner.clean_inventory()
+                lineage.log_lineage(run_id, source_dataset="inventory", silver_path="silver/inventory/inventory_clean.csv")
+                
+                builder = FeatureBuilder()
+                builder.build_customer_metrics()
+                lineage.log_lineage(run_id, source_dataset="customer_metrics", gold_path="gold/customer_metrics/customer_metrics.csv")
+                builder.build_sales_metrics()
+                lineage.log_lineage(run_id, source_dataset="sales_metrics", gold_path="gold/sales_metrics/sales_metrics.csv")
+                
+                inv_builder = InventoryMetricsBuilder()
+                inv_builder.build_inventory_metrics()
+                lineage.log_lineage(run_id, source_dataset="inventory_metrics", gold_path="gold/inventory_metrics/inventory_metrics.csv")
+                
+                wh_loader = WarehouseLoader()
+                wh_loader.load_dimensions()
+                wh_loader.load_facts()
+                
+                tracker.complete_run(run_id, status="COMPLETED")
+                st.success("Successfully reset data to default mock state and reloaded warehouse!")
+            except Exception as e:
+                st.error(f"Failed to reset demo data: {e}")
