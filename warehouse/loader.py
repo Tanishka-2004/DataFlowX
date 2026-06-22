@@ -568,3 +568,49 @@ class WarehouseLoader:
             "dup_cust": dup_cust,
             "dup_prod": dup_prod
         }
+
+    def load_dimensions(self):
+        """Loads and processes all dimensions into the warehouse from Silver storage."""
+        self.populate_dim_store()
+        
+        from storage.s3_manager import StorageManager
+        storage = StorageManager()
+        
+        cust_temp = "temp_load_cust.csv"
+        if storage.download_file("silver/crm_customers/crm_customers_clean.csv", cust_temp):
+            cust_df = pd.read_csv(cust_temp)
+            self.populate_dim_customer_scd2(cust_df)
+            if os.path.exists(cust_temp):
+                os.remove(cust_temp)
+                
+        prod_temp = "temp_load_prod.csv"
+        if storage.download_file("silver/products/products_clean.csv", prod_temp):
+            prod_df = pd.read_csv(prod_temp)
+            self.populate_dim_product_scd2(prod_df)
+            if os.path.exists(prod_temp):
+                os.remove(prod_temp)
+
+    def load_facts(self):
+        """Loads and processes all facts and gold metrics into the warehouse, running integrity checks."""
+        from storage.s3_manager import StorageManager
+        storage = StorageManager()
+        
+        sales_temp = "temp_load_sales.csv"
+        if storage.download_file("silver/pos_transactions/pos_transactions_clean.csv", sales_temp):
+            sales_df = pd.read_csv(sales_temp)
+            self.load_fact_sales(sales_df)
+            if os.path.exists(sales_temp):
+                os.remove(sales_temp)
+                
+        orders_temp = "temp_load_orders.csv"
+        if storage.download_file("silver/erp_orders/erp_orders_clean.csv", orders_temp):
+            orders_df = pd.read_csv(orders_temp)
+            self.load_fact_orders(orders_df)
+            if os.path.exists(orders_temp):
+                os.remove(orders_temp)
+                
+        # Load gold reporting metrics tables
+        self.load_gold_metrics()
+        
+        # Run integrity validation checks
+        self.run_integrity_checks()

@@ -181,7 +181,7 @@ class SmartIngestionDetector:
             dtype_str = str(df[col].dtype)
             schema_dict[col] = dtype_str
             
-            if np.issubdtype(df[col].dtype, np.number):
+            if pd.api.types.is_numeric_dtype(df[col]):
                 numeric_cols += 1
             else:
                 # Try parsing as datetime
@@ -190,7 +190,7 @@ class SmartIngestionDetector:
                     # Sample some values and try to parse
                     sample = df[col].dropna().head(5).astype(str)
                     if len(sample) > 0:
-                        parsed = pd.to_datetime(sample, errors='coerce')
+                        parsed = pd.to_datetime(sample, format='mixed', errors='coerce')
                         if parsed.notnull().sum() == len(sample):
                             is_date = True
                 except Exception:

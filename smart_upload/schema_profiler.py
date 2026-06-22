@@ -28,7 +28,7 @@ class SchemaProfiler:
             dtype_str = str(df[col].dtype)
             schema_dict[col] = dtype_str
             
-            if np.issubdtype(df[col].dtype, np.number):
+            if pd.api.types.is_numeric_dtype(df[col]):
                 numeric_fields.append(col)
             else:
                 # Try to parse as date
@@ -36,7 +36,7 @@ class SchemaProfiler:
                 try:
                     non_null_samples = df[col].dropna().head(5).astype(str)
                     if len(non_null_samples) > 0:
-                        parsed = pd.to_datetime(non_null_samples, errors='coerce')
+                        parsed = pd.to_datetime(non_null_samples, format='mixed', errors='coerce')
                         if parsed.notnull().sum() == len(non_null_samples):
                             is_date = True
                 except Exception:

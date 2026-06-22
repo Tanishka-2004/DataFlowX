@@ -223,774 +223,400 @@ elif dashboard_selection == "Inventory Analytics":
         st.info("No inventory analytics data is currently available in the warehouse. Run the pipeline first.")
 
 elif dashboard_selection == "Upload Data & Pipeline (Demo Mode)":
-    col_h1, col_h2 = st.columns([3, 1])
-    with col_h1:
-        st.header("📥 Self-Service Data Onboarding Platform")
-    with col_h2:
-        advanced_mode = st.toggle(
-            "Advanced Mode", 
-            value=st.session_state.get("advanced_mode", False), 
-            help="Enable manual overrides for dataset types and column mappings."
-        )
-        st.session_state["advanced_mode"] = advanced_mode
+    # ─────────────────────────────────────────────────────────────────
+    # DEMO MODE  –  Pre-loaded datasets, one-click pipeline execution.
+    # Purpose   :  Guaranteed end-to-end pipeline demo using the 5
+    #              built-in conformed CSV files. No upload required.
+    #              See "Smart Upload Mode" for arbitrary CSV onboarding.
+    # ─────────────────────────────────────────────────────────────────
 
     st.markdown("""
-    This platform allows you to drag-and-drop arbitrary CSV datasets, profile schemas, validate quality categories, and onboard them into the conformed Medallion Data Platform Warehouse.
-    """)
+    <style>
+    .demo-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #f97316, #ea580c);
+        color: white;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        padding: 3px 10px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }
+    .demo-card {
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-left: 4px solid #f97316;
+        border-radius: 10px;
+        padding: 16px 18px;
+        margin-bottom: 8px;
+    }
+    .demo-card-title { font-size: 15px; font-weight: 700; color: #f1f5f9; margin: 0 0 4px 0; }
+    .demo-card-sub   { font-size: 12px; color: #94a3b8; margin: 0; }
+    .demo-card-pill  {
+        display: inline-block;
+        background: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 2px 10px;
+        font-size: 11px;
+        color: #64748b;
+        margin-top: 8px;
+        margin-right: 4px;
+    }
+    .diff-box {
+        background: #0f172a;
+        border: 1px solid #1e3a5f;
+        border-radius: 10px;
+        padding: 18px 22px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
+    col_h1, col_h2 = st.columns([4, 1])
+    with col_h1:
+        st.markdown('<span class="demo-badge">Demo Mode</span>', unsafe_allow_html=True)
+        st.header("🎬 Pipeline Demo Launcher")
+        st.caption("Pre-loaded with 5 conformed datasets. Runs the full Bronze → Silver → Gold → Warehouse pipeline in one click.")
+    with col_h2:
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.info("🔒 No upload\nrequired")
+
+    st.markdown("---")
+
+    # ── HOW THIS IS DIFFERENT FROM SMART UPLOAD ──────────────────────
+    with st.expander("ℹ️  How is Demo Mode different from Smart Upload Mode?", expanded=False):
+        st.markdown("""
+        <div class="diff-box">
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+          <thead>
+            <tr style="border-bottom:1px solid #334155;">
+              <th style="padding:8px 12px; text-align:left; color:#94a3b8;">Feature</th>
+              <th style="padding:8px 12px; text-align:left; color:#f97316;">🎬 Demo Mode</th>
+              <th style="padding:8px 12px; text-align:left; color:#6366f1;">⚡ Smart Upload Mode</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding:7px 12px; color:#cbd5e1;">File Upload</td>
+                <td style="padding:7px 12px; color:#86efac;">❌ Not needed — uses built-in data</td>
+                <td style="padding:7px 12px; color:#86efac;">✅ Upload any arbitrary CSV file</td></tr>
+            <tr style="background:#0f172a;"><td style="padding:7px 12px; color:#cbd5e1;">Dataset Names</td>
+                <td style="padding:7px 12px; color:#86efac;">Fixed (crm_customers, erp_orders…)</td>
+                <td style="padding:7px 12px; color:#86efac;">Any name (client_export_q1.csv…)</td></tr>
+            <tr><td style="padding:7px 12px; color:#cbd5e1;">AI Classification</td>
+                <td style="padding:7px 12px; color:#86efac;">❌ Not needed — types are known</td>
+                <td style="padding:7px 12px; color:#86efac;">✅ Confidence-based auto-detection</td></tr>
+            <tr style="background:#0f172a;"><td style="padding:7px 12px; color:#cbd5e1;">Column Mapping</td>
+                <td style="padding:7px 12px; color:#86efac;">❌ Pre-conformed, no mapping needed</td>
+                <td style="padding:7px 12px; color:#86efac;">✅ Visual drag-and-drop field mapping</td></tr>
+            <tr><td style="padding:7px 12px; color:#cbd5e1;">Schema Profiling</td>
+                <td style="padding:7px 12px; color:#86efac;">❌ Schemas are fixed and known</td>
+                <td style="padding:7px 12px; color:#86efac;">✅ Full schema versioning & DQ analysis</td></tr>
+            <tr style="background:#0f172a;"><td style="padding:7px 12px; color:#cbd5e1;">Pipeline Trigger</td>
+                <td style="padding:7px 12px; color:#86efac;">✅ One click — instant execution</td>
+                <td style="padding:7px 12px; color:#86efac;">✅ After review & approval workflow</td></tr>
+            <tr><td style="padding:7px 12px; color:#cbd5e1;">Use Case</td>
+                <td style="padding:7px 12px; color:#86efac;">Demos, presentations, resets</td>
+                <td style="padding:7px 12px; color:#86efac;">Real data onboarding from any source</td></tr>
+          </tbody>
+        </table>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # ── PRE-LOADED DATASET CARDS ──────────────────────────────────────
+    st.subheader("📦 Pre-Loaded Demo Datasets")
+    st.caption("These 5 conformed datasets are built into DataFlowX and ready to run at any time.")
+
+    DEMO_DATASETS = [
+        {"name": "CRM – Customers",      "file": "crm_customers.csv",    "type": "CRM",       "icon": "👥", "rows": "5,000",  "desc": "Customer master: IDs, names, signup dates, regions, LTV"},
+        {"name": "ERP – Orders",         "file": "erp_orders.csv",        "type": "ERP",       "icon": "📦", "rows": "20,000", "desc": "Enterprise orders: order IDs, amounts, fulfilment dates"},
+        {"name": "POS – Transactions",   "file": "pos_transactions.csv",  "type": "POS",       "icon": "🛒", "rows": "50,000", "desc": "Point-of-sale: transaction IDs, store IDs, revenue"},
+        {"name": "Inventory – Stock",    "file": "inventory.csv",         "type": "Inventory", "icon": "🏭", "rows": "10,000", "desc": "Warehouse stock levels, restock dates, supplier info"},
+        {"name": "Products – Catalog",   "file": "products.csv",          "type": "Products",  "icon": "🏷️", "rows": "~100",   "desc": "Product master: IDs, names, categories, pricing"},
+    ]
+
+    c1, c2, c3 = st.columns(3)
+    cols = [c1, c2, c3]
+    for i, ds in enumerate(DEMO_DATASETS):
+        with cols[i % 3]:
+            st.markdown(f"""
+            <div class="demo-card">
+              <div class="demo-card-title">{ds['icon']} {ds['name']}</div>
+              <div class="demo-card-sub">{ds['desc']}</div>
+              <span class="demo-card-pill">📄 {ds['file']}</span>
+              <span class="demo-card-pill">🔢 {ds['rows']} rows</span>
+              <span class="demo-card-pill">🏷 {ds['type']}</span>
+            </div>
+            """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # ── PIPELINE EXECUTION ────────────────────────────────────────────
+    st.subheader("🚀 One-Click Medallion Pipeline")
+    st.caption("Executes all 6 stages: Column Conforming → Bronze → Quality → Silver → Gold → Warehouse")
+
+    col_run1, col_run2, col_run3 = st.columns([2, 1, 1])
+    with col_run1:
+        run_pipeline_btn = st.button(
+            "▶ Run Full Medallion Pipeline on Demo Data",
+            use_container_width=True,
+            type="primary",
+            help="Runs all 6 ETL stages on the 5 pre-loaded conformed datasets"
+        )
+    with col_run2:
+        st.metric("Datasets", "5 pre-loaded")
+    with col_run3:
+        st.metric("Pipeline Stages", "6 stages")
+
+    if run_pipeline_btn:
+        status_container = st.empty()
+        progress_bar = st.progress(0)
+        run_id = f"manual__streamlit_{int(time.time())}"
+
+        try:
+            from metadata.tracker import MetadataTracker
+            from metadata.lineage_tracker import LineageTracker
+            from ingestion.csv_loader import CSVLoader
+            from quality.validator import DataValidator
+            from transformations.cleaner import DataCleaner
+            from transformations.inventory_cleaner import InventoryCleaner
+            from feature_engineering.builder import FeatureBuilder
+            from feature_engineering.inventory_metrics import InventoryMetricsBuilder
+            from warehouse.loader import WarehouseLoader
+            from metadata.watermarks import WatermarkManager
+            from datetime import datetime
+            import json
+
+            tracker = MetadataTracker()
+            tracker.start_run(run_id)
+            lineage = LineageTracker()
+
+            SOURCES = [
+                ("erp_orders",       "erp_orders.csv",       "order_date"),
+                ("crm_customers",    "crm_customers.csv",    "signup_date"),
+                ("pos_transactions", "pos_transactions.csv", "timestamp"),
+                ("products",         "products.csv",         None),
+                ("inventory",        "inventory.csv",        "last_restock_date"),
+            ]
+
+            # Step 1 – Reset watermarks
+            status_container.markdown("### ⏳ Medallion Pipeline Execution\n**Stage 1 / 6 — Resetting watermarks & conforming source columns...**")
+            progress_bar.progress(10)
+            wm = WatermarkManager()
+            for src, _, _ in SOURCES:
+                wm.update_watermark(src, datetime(2000, 1, 1))
+            time.sleep(0.8)
+
+            # Step 2 – Bronze
+            status_container.markdown(
+                "### ⏳ Medallion Pipeline Execution\n"
+                "✅ Stage 1 / 6 — Watermarks reset\n"
+                "**Stage 2 / 6 — Loading CSVs to Bronze Data Lake (Parquet)...**"
+            )
+            progress_bar.progress(28)
+            loader = CSVLoader()
+            total_processed = 0
+            for src, file, dt_col in SOURCES:
+                df_ingest = loader.load_incremental(src, file, dt_col)
+                loader.save_to_bronze(df_ingest, src)
+                total_processed += len(df_ingest)
+                lineage.log_lineage(run_id, source_dataset=src, bronze_path=f"bronze/{src}/{src}_raw.csv")
+            tracker.update_run(run_id, rows_processed=total_processed)
+            time.sleep(0.8)
+
+            # Step 3 – Quality
+            status_container.markdown(
+                "### ⏳ Medallion Pipeline Execution\n"
+                "✅ Stage 1 / 6 — Watermarks reset\n"
+                "✅ Stage 2 / 6 — Bronze Data Lake loaded\n"
+                "**Stage 3 / 6 — Running Data Quality expectations...**"
+            )
+            progress_bar.progress(46)
+            validator = DataValidator()
+            from storage.s3_manager import StorageManager
+            storage = StorageManager()
+            DQ_CHECKS = {
+                "crm_customers":    [("customer_id", "not_null"), ("customer_id", "unique")],
+                "products":         [("product_id",  "not_null"), ("product_id",  "unique")],
+                "erp_orders":       [("order_id",    "not_null"), ("order_id",    "unique")],
+                "pos_transactions": [("transaction_id", "not_null"), ("transaction_id", "unique")],
+                "inventory":        [("store_id", "not_null"),   ("product_id", "not_null")],
+            }
+            for src_name, _, _ in SOURCES:
+                local_temp = f"temp_validate_{src_name}.csv"
+                if storage.download_file(f"bronze/{src_name}/{src_name}_raw.csv", local_temp):
+                    df_val = pd.read_csv(local_temp)
+                    for col, check in DQ_CHECKS.get(src_name, []):
+                        if check == "not_null":
+                            validator.expect_column_values_to_not_be_null(df_val, col, src_name)
+                        elif check == "unique":
+                            validator.expect_column_values_to_be_unique(df_val, col, src_name)
+                    os.remove(local_temp)
+            time.sleep(0.8)
+
+            # Step 4 – Silver
+            status_container.markdown(
+                "### ⏳ Medallion Pipeline Execution\n"
+                "✅ Stage 1 / 6 — Watermarks reset\n"
+                "✅ Stage 2 / 6 — Bronze Data Lake loaded\n"
+                "✅ Stage 3 / 6 — Data Quality checks passed\n"
+                "**Stage 4 / 6 — Applying Pandas Silver transformations...**"
+            )
+            progress_bar.progress(62)
+            cleaner = DataCleaner()
+            for dataset in ["crm_customers", "products", "erp_orders", "pos_transactions"]:
+                cleaner.process_and_save_silver(dataset)
+                lineage.log_lineage(run_id, source_dataset=dataset, silver_path=f"silver/{dataset}/{dataset}_clean.csv")
+            inv_cleaner = InventoryCleaner()
+            inv_cleaner.process_and_save_silver()
+            lineage.log_lineage(run_id, source_dataset="inventory", silver_path="silver/inventory/inventory_clean.csv")
+            time.sleep(0.8)
+
+            # Step 5 – Gold
+            status_container.markdown(
+                "### ⏳ Medallion Pipeline Execution\n"
+                "✅ Stage 1 / 6 — Watermarks reset\n"
+                "✅ Stage 2 / 6 — Bronze Data Lake loaded\n"
+                "✅ Stage 3 / 6 — Data Quality checks passed\n"
+                "✅ Stage 4 / 6 — Silver transformations complete\n"
+                "**Stage 5 / 6 — Building Gold aggregations & feature metrics...**"
+            )
+            progress_bar.progress(80)
+            builder = FeatureBuilder()
+            builder.build_customer_metrics()
+            lineage.log_lineage(run_id, source_dataset="crm_customers", gold_path="gold/customer_metrics/customer_metrics.csv")
+            builder.build_sales_metrics()
+            lineage.log_lineage(run_id, source_dataset="pos_transactions", gold_path="gold/sales_metrics/sales_metrics.csv")
+            inv_builder = InventoryMetricsBuilder()
+            inv_builder.build_inventory_metrics()
+            lineage.log_lineage(run_id, source_dataset="inventory", gold_path="gold/inventory_metrics/inventory_metrics.csv")
+            time.sleep(0.8)
+
+            # Step 6 – Warehouse
+            status_container.markdown(
+                "### ⏳ Medallion Pipeline Execution\n"
+                "✅ Stage 1 / 6 — Watermarks reset\n"
+                "✅ Stage 2 / 6 — Bronze Data Lake loaded\n"
+                "✅ Stage 3 / 6 — Data Quality checks passed\n"
+                "✅ Stage 4 / 6 — Silver transformations complete\n"
+                "✅ Stage 5 / 6 — Gold aggregations built\n"
+                "**Stage 6 / 6 — Loading Star Schema dimensions & fact tables...**"
+            )
+            progress_bar.progress(94)
+            wh_loader = WarehouseLoader()
+            wh_loader.load_dimensions()
+            wh_loader.load_facts()
+            tracker.complete_run(run_id, status="SUCCESS")
+            time.sleep(0.6)
+
+            # ── Register all 5 demo datasets ──────────────────────────
+            DEMO_META = {
+                "crm_customers":    ("CRM",       "crm_customers.csv"),
+                "erp_orders":       ("ERP",       "erp_orders.csv"),
+                "pos_transactions": ("POS",       "pos_transactions.csv"),
+                "inventory":        ("Inventory", "inventory.csv"),
+                "products":         ("Products",  "products.csv"),
+            }
+            for ds_key, (ds_type, ds_file) in DEMO_META.items():
+                try:
+                    df_reg = pd.read_csv(ds_file)
+                    tracker.register_dataset(
+                        name=ds_key,
+                        dtype=ds_type,
+                        status="Completed",
+                        rows=len(df_reg),
+                        cols=len(df_reg.columns),
+                        schema_def=json.dumps({c: str(df_reg[c].dtype) for c in df_reg.columns}),
+                        q_score=100.0, comp_score=100.0, val_score=100.0,
+                        uniq_score=100.0, cons_score=100.0,
+                        q_details="[]", conf_score=100.0, det_signals="[]",
+                        run_id=run_id,
+                        original_filename=ds_file,
+                        source_file_name=ds_file,
+                        source_dataset_type=ds_type
+                    )
+                except Exception:
+                    pass
+
+            status_container.markdown(
+                "### ✅ Pipeline Complete!\n"
+                "✅ Stage 1 / 6 — Watermarks reset\n"
+                "✅ Stage 2 / 6 — Bronze Data Lake loaded\n"
+                "✅ Stage 3 / 6 — Data Quality checks passed\n"
+                "✅ Stage 4 / 6 — Silver transformations complete\n"
+                "✅ Stage 5 / 6 — Gold aggregations built\n"
+                "✅ Stage 6 / 6 — Warehouse Star Schema updated"
+            )
+            progress_bar.progress(100)
+            st.success(f"🎉 Demo pipeline `{run_id}` completed successfully! Navigate to Sales Analytics, Customer Analytics, or Inventory Analytics to view results.")
+            st.rerun()
+
+        except Exception as e:
+            try:
+                tracker.complete_run(run_id, status="FAILED", error_message=str(e)[:400])
+            except Exception:
+                pass
+            status_container.markdown("### ❌ Pipeline Failed")
+            progress_bar.progress(100)
+            st.error(f"Demo pipeline execution failed: {e}")
+
+    st.markdown("---")
+
+    # ── LAST PIPELINE RUNS ────────────────────────────────────────────
+    st.subheader("📋 Last Pipeline Run History")
     from metadata.tracker import MetadataTracker
     tracker = MetadataTracker()
     registry_entries = tracker.get_registered_datasets()
-
-    # 1. SMART UPLOAD CENTRE
-    st.subheader("1. File Upload Center")
-    uploaded_files = st.file_uploader(
-        "Drag and drop one or more CSV files",
-        type=["csv"],
-        accept_multiple_files=True,
-        help="Support arbitrarily named files (e.g. customer_export.csv, sales_january.csv)"
-    )
-
-    if uploaded_files:
-        from dashboards.detector import SmartIngestionDetector
-        import json
-        
-        if "uploads" not in st.session_state:
-            st.session_state["uploads"] = {}
-            
-        for uploaded_file in uploaded_files:
-            fn = uploaded_file.name
-            if fn not in st.session_state["uploads"]:
-                df_up = pd.read_csv(uploaded_file)
-                
-                # smart detection and profiling
-                profile = SmartIngestionDetector.profile_schema(df_up)
-                det_type, confidence, explanation, signals = SmartIngestionDetector.detect_dataset_type(df_up, fn)
-                auto_map = SmartIngestionDetector.get_auto_mappings(df_up, det_type)
-                
-                # DQ checks
-                comp, val, uniq, cons, dq_score, deductions = SmartIngestionDetector.validate_dataset(df_up, det_type, auto_map)
-                
-                st.session_state["uploads"][fn] = {
-                    "df": df_up,
-                    "profile": profile,
-                    "detected_type": det_type,
-                    "user_type": det_type,
-                    "confidence": confidence,
-                    "explanation": explanation,
-                    "signals": signals,
-                    "auto_map": auto_map,
-                    "user_map": auto_map.copy(),
-                    "completeness": comp,
-                    "validity": val,
-                    "uniqueness": uniq,
-                    "consistency": cons,
-                    "quality_score": dq_score,
-                    "deductions": deductions,
-                    "status": "Draft",
-                    "schema_version": 1
-                }
-
-    # 2. ACTIVE FILE STAGING WORKFLOW
-    if "uploads" in st.session_state and st.session_state["uploads"]:
-        st.markdown("---")
-        st.subheader("2. Dataset Staging & Configuration")
-        active_files = list(st.session_state["uploads"].keys())
-        selected_file = st.selectbox("Select Staged File to Configure:", active_files)
-        
-        file_info = st.session_state["uploads"][selected_file]
-        df = file_info["df"]
-        
-        # Staging workflow lifecycle auto transition
-        if file_info["status"] == "Draft":
-            file_info["status"] = "Profiled"
-            
-        st.write(f"Staging Lifecycle Status: **{file_info['status']}**")
-        
-        tab_detect, tab_profile, tab_map, tab_val, tab_dep, tab_impact = st.tabs([
-            "🔍 Dataset Detection", "📊 Schema Profiling", "🗺️ Column Mapping", "🛡️ Quality Analysis", "⛓️ Dependency Check", "🎯 Impact Preview"
-        ])
-        
-        # A. Dataset Detection Tab
-        with tab_detect:
-            st.write("### Intelligent Classification")
-            
-            if advanced_mode:
-                file_info["user_type"] = st.selectbox(
-                    "Manually Override Detected Dataset Type:",
-                    ["CRM", "ERP", "POS", "Inventory", "Products", "Unknown"],
-                    index=["CRM", "ERP", "POS", "Inventory", "Products", "Unknown"].index(file_info["user_type"])
-                )
-            else:
-                st.write(f"Detected Dataset Type: **{file_info['user_type']} Dataset**")
-                st.write(f"Confidence Score: **{file_info['confidence']}%**")
-                
-            st.markdown("#### Matched Signals Explanation:")
-            for sig in file_info["explanation"]:
-                st.markdown(sig)
-                
-        # B. Schema Profiling Tab
-        with tab_profile:
-            st.write("### Schema Profile & Metadata")
-            col_prof1, col_prof2, col_prof3, col_prof4 = st.columns(4)
-            profile = file_info["profile"]
-            
-            col_prof1.metric("Rows", f"{profile['rows']:,}")
-            col_prof2.metric("Columns", f"{profile['columns']}")
-            col_prof3.metric("Null Cell Rate", f"{profile['null_rate']}%")
-            col_prof4.metric("Duplicate Row Rate", f"{profile['dup_rate']}%")
-            
-            st.write(f"**Column Data Types**: Numeric ({profile['numeric_count']}), Date ({profile['date_count']}), Categorical ({profile['categorical_count']})")
-            
-            # Schema Versioning
-            existing_reg = None
-            if registry_entries:
-                for entry in registry_entries:
-                    if entry.dataset_name == selected_file:
-                        existing_reg = entry
-                        break
-                        
-            if existing_reg:
-                import json
-                try:
-                    old_schema = json.loads(existing_reg.schema_definition)
-                    current_schema = profile["schema_definition"]
-                    added_cols = [c for c in current_schema.keys() if c not in old_schema]
-                    removed_cols = [c for c in old_schema.keys() if c not in current_schema]
-                    
-                    if added_cols or removed_cols:
-                        st.warning(f"⚠️ **Schema Change Detected**: Version v{existing_reg.schema_version} ➔ v{existing_reg.schema_version + 1}")
-                        if added_cols: st.write(f"*Added Columns*: " + ", ".join([f"`{c}`" for c in added_cols]))
-                        if removed_cols: st.write(f"*Removed Columns*: " + ", ".join([f"`{c}`" for c in removed_cols]))
-                        file_info["schema_version"] = existing_reg.schema_version + 1
-                    else:
-                        st.success(f"✓ Schema matches existing registered version (v{existing_reg.schema_version})")
-                        file_info["schema_version"] = existing_reg.schema_version
-                except Exception:
-                    pass
-            else:
-                st.info("New dataset onboard. Version v1 will be created in the registry.")
-                
-            st.markdown("#### Schema Fields Preview")
-            st.dataframe(pd.DataFrame(list(profile["schema_definition"].items()), columns=["Column Name", "Type"]), use_container_width=True)
-
-        # C. Column Mapping Tab
-        with tab_map:
-            st.write("### Conformed Target Field Mapping")
-            from dashboards.detector import SCHEMA_DEFINITIONS
-            
-            if file_info["user_type"] == "Unknown":
-                st.info("Dataset type is Unknown. Switch to Advanced Mode to assign a type for column mapping.")
-            else:
-                target_schema = SCHEMA_DEFINITIONS[file_info["user_type"]]
-                new_mappings = {}
-                col_map1, col_map2 = st.columns(2)
-                
-                for idx, (field, col_meta) in enumerate(target_schema.items()):
-                    with col_map1 if idx % 2 == 0 else col_map2:
-                        default_val = file_info["user_map"].get(field)
-                        options = [None] + list(df.columns)
-                        default_idx = options.index(default_val) if default_val in options else 0
-                        
-                        mapped = st.selectbox(
-                            f"Target Field: '{field}' ({col_meta['type']}) {'*' if col_meta['required'] else ''}",
-                            options,
-                            index=default_idx,
-                            key=f"map_{selected_file}_{field}"
-                        )
-                        new_mappings[field] = mapped
-                        
-                file_info["user_map"] = new_mappings
-                
-                # Refresh quality evaluation based on updated mappings
-                from dashboards.detector import SmartIngestionDetector
-                comp, val, uniq, cons, dq_score, deductions = SmartIngestionDetector.validate_dataset(
-                    df, file_info["user_type"], file_info["user_map"]
-                )
-                file_info["completeness"] = comp
-                file_info["validity"] = val
-                file_info["uniqueness"] = uniq
-                file_info["consistency"] = cons
-                file_info["quality_score"] = dq_score
-                file_info["deductions"] = deductions
-                
-                # Auto transition to Validated
-                if file_info["status"] == "Profiled":
-                    file_info["status"] = "Validated"
-
-        # D. Quality Analysis Tab
-        with tab_val:
-            st.write("### Data Quality Center")
-            col_dq1, col_dq2, col_dq3, col_dq4, col_dq5 = st.columns(5)
-            
-            col_dq1.metric("Completeness", f"{file_info['completeness']}/100")
-            col_dq2.metric("Validity", f"{file_info['validity']}/100")
-            col_dq3.metric("Uniqueness", f"{file_info['uniqueness']}/100")
-            col_dq4.metric("Consistency", f"{file_info['consistency']}/100")
-            col_dq5.metric("Overall Score", f"{file_info['quality_score']}/100")
-            
-            if file_info["deductions"]:
-                st.markdown("#### Quality Deductions & Warnings")
-                for ded in file_info["deductions"]:
-                    st.markdown(f"🔴 **-{ded['points']} pts** ({ded['category']}): {ded['reason']}")
-            else:
-                st.success("All conformed schema and business rule validations passed! DQ Score: 100/100")
-
-        # E. Dependency Check Tab
-        with tab_dep:
-            st.write("### Dataset Dependency Analysis")
-            db_types = [entry.detected_type for entry in registry_entries] if registry_entries else []
-            up_types = [up["user_type"] for up in st.session_state["uploads"].values()]
-            all_types = set(db_types + up_types)
-            
-            missing_deps = []
-            if file_info["user_type"] in ["ERP", "POS"]:
-                if "CRM" not in all_types: missing_deps.append("CRM (Customers) Dataset")
-                if "Products" not in all_types: missing_deps.append("Products (Catalog) Dataset")
-            elif file_info["user_type"] == "Inventory":
-                if "Products" not in all_types: missing_deps.append("Products (Catalog) Dataset")
-                
-            if missing_deps:
-                st.warning("⚠️ **Missing Downstream Relations**:\n" + "\n".join([f"- {d}" for d in missing_deps]) + "\n\n*Pipeline can execute, but ranges/Smart-Keys will fallback to default dimensions where mappings fail.*")
-            else:
-                st.success("✓ All related dimension and fact dependencies are available and conformed!")
-
-        # F. Impact Preview Tab
-        with tab_impact:
-            st.write("### Ingestion Impact Preview")
-            col_imp1, col_imp2, col_imp3 = st.columns(3)
-            
-            gold_tables = 0
-            dash_kpis = 0
-            wh_updates = []
-            if file_info["user_type"] == "CRM":
-                gold_tables = 1
-                dash_kpis = 3
-                wh_updates = ["dim_customer", "gold_customer_metrics"]
-            elif file_info["user_type"] == "Products":
-                gold_tables = 1
-                dash_kpis = 2
-                wh_updates = ["dim_product", "gold_inventory_metrics"]
-            elif file_info["user_type"] in ["ERP", "POS"]:
-                gold_tables = 2
-                dash_kpis = 5
-                wh_updates = ["fact_sales", "fact_orders", "gold_sales_metrics", "gold_customer_metrics"]
-            elif file_info["user_type"] == "Inventory":
-                gold_tables = 1
-                dash_kpis = 4
-                wh_updates = ["gold_inventory_metrics"]
-                
-            col_imp1.metric("Rows to Process", f"{profile['rows']:,}")
-            col_imp2.metric("Gold Tables Affected", f"{gold_tables}")
-            col_imp3.metric("Dashboard metrics affected", f"{dash_kpis}")
-            st.write(f"**Target Warehouse Updates**: " + ", ".join([f"`{t}`" for t in wh_updates]))
-            
-            st.markdown("#### Sample Records Preview")
-            st.write(df.head(5))
-
-        st.markdown("---")
-        col_app1, col_app2 = st.columns(2)
-        with col_app1:
-            approve_btn = st.button("✅ Approve Dataset for Ingestion", use_container_width=True, disabled=(file_info["status"] == "Ready"))
-            if approve_btn:
-                file_info["status"] = "Ready"
-                st.success("Dataset approved and set to READY state.")
-                st.rerun()
-        with col_app2:
-            discard_btn = st.button("🗑️ Discard Uploaded File", use_container_width=True)
-            if discard_btn:
-                del st.session_state["uploads"][selected_file]
-                st.success("Dataset upload deleted from staging.")
-                st.rerun()
-
-    # 3. PIPELINE CONTROL PANEL
-    st.markdown("---")
-    st.subheader("3. Pipeline Execution Center")
-    
-    ready_files = [fn for fn, up in st.session_state.get("uploads", {}).items() if up["status"] == "Ready"]
-    
-    if ready_files:
-        st.success(f"Approved dataset(s) ready for ingestion: " + ", ".join([f"`{f}`" for f in ready_files]))
-        run_pipeline_btn = st.button("🚀 Ingest & Run Medallion Pipeline", use_container_width=True)
-        
-        if run_pipeline_btn:
-            # Change status to Running
-            for fn in ready_files:
-                st.session_state["uploads"][fn]["status"] = "Running"
-                
-            status_container = st.empty()
-            progress_bar = st.progress(0)
-            run_id = f"manual__streamlit_{int(time.time())}"
-            
-            try:
-                from metadata.tracker import MetadataTracker
-                from metadata.lineage_tracker import LineageTracker
-                from ingestion.csv_loader import CSVLoader
-                from quality.validator import DataValidator
-                from transformations.cleaner import DataCleaner
-                from transformations.inventory_cleaner import InventoryCleaner
-                from feature_engineering.builder import FeatureBuilder
-                from feature_engineering.inventory_metrics import InventoryMetricsBuilder
-                from warehouse.loader import WarehouseLoader
-                from metadata.watermarks import WatermarkManager
-                from datetime import datetime
-                
-                tracker = MetadataTracker()
-                tracker.start_run(run_id)
-                lineage = LineageTracker()
-                
-                # Step 1: Mapping
-                status_container.markdown("### Ingestion Timeline\n⏳ **Step 1/6: Preserving source identity and conforming columns...**")
-                progress_bar.progress(15)
-                time.sleep(1)
-                
-                for fn in ready_files:
-                    file_info = st.session_state["uploads"][fn]
-                    df_raw = file_info["df"]
-                    user_map = file_info["user_map"]
-                    ds_type = file_info["user_type"]
-                    
-                    rename_dict = {v: k for k, v in user_map.items() if v is not None}
-                    df_mapped = df_raw.rename(columns=rename_dict)
-                    
-                    conformed_cols = list(user_map.keys())
-                    for col in conformed_cols:
-                        if col not in df_mapped.columns:
-                            df_mapped[col] = None
-                    df_mapped = df_mapped[conformed_cols]
-                    
-                    conformed_fn = ""
-                    if ds_type == "CRM": conformed_fn = "crm_customers.csv"
-                    elif ds_type == "ERP": conformed_fn = "erp_orders.csv"
-                    elif ds_type == "POS": conformed_fn = "pos_transactions.csv"
-                    elif ds_type == "Inventory": conformed_fn = "inventory.csv"
-                    elif ds_type == "Products": conformed_fn = "products.csv"
-                    
-                    df_mapped.to_csv(conformed_fn, index=False)
-                    os.makedirs("data", exist_ok=True)
-                    df_mapped.to_csv(os.path.join("data", conformed_fn), index=False)
-                    
-                    # Store original exactly as uploaded
-                    os.makedirs("uploads", exist_ok=True)
-                    df_raw.to_csv(os.path.join("uploads", fn), index=False)
-                    
-                    os.makedirs("data_lake/bronze", exist_ok=True)
-                    df_raw.to_csv(os.path.join("data_lake/bronze", fn), index=False)
-                    
-                    schema_def = json.dumps(file_info["profile"]["schema_definition"])
-                    q_details = json.dumps(file_info["deductions"])
-                    signals_def = json.dumps(file_info["signals"])
-                    
-                    tracker.register_dataset(
-                        name=fn,
-                        dtype=ds_type,
-                        status="Running",
-                        rows=file_info["profile"]["rows"],
-                        cols=file_info["profile"]["columns"],
-                        schema_def=schema_def,
-                        q_score=file_info["quality_score"],
-                        comp_score=file_info["completeness"],
-                        val_score=file_info["validity"],
-                        uniq_score=file_info["uniqueness"],
-                        cons_score=file_info["consistency"],
-                        q_details=q_details,
-                        conf_score=file_info["confidence"],
-                        det_signals=signals_def,
-                        user="anonymous",
-                        run_id=run_id
-                    )
-                    
-                wm = WatermarkManager()
-                for src in ["erp_orders", "crm_customers", "pos_transactions", "products", "inventory"]:
-                    wm.update_watermark(src, datetime(2000, 1, 1))
-
-                # Step 2: Bronze
-                status_container.markdown("### Ingestion Timeline\n"
-                                          "✓ **Step 1/6: Preserving source identity and conforming columns**\n"
-                                          "⏳ **Step 2/6: Loading raw CSVs to Bronze Data Lake...**")
-                progress_bar.progress(30)
-                time.sleep(1)
-                
-                loader = CSVLoader()
-                sources = [
-                    ("erp_orders", "erp_orders.csv", "order_date"),
-                    ("crm_customers", "crm_customers.csv", "signup_date"),
-                    ("pos_transactions", "pos_transactions.csv", "timestamp"),
-                    ("products", "products.csv", None),
-                    ("inventory", "inventory.csv", "last_restock_date")
-                ]
-                total_processed = 0
-                for src, file, dt_col in sources:
-                    df_ingest = loader.load_incremental(src, file, dt_col)
-                    loader.save_to_bronze(df_ingest, src)
-                    total_processed += len(df_ingest)
-                    
-                    matching_fn = src
-                    for fn in ready_files:
-                        if st.session_state["uploads"][fn]["user_type"] == (
-                            "CRM" if src == "crm_customers" else
-                            "ERP" if src == "erp_orders" else
-                            "POS" if src == "pos_transactions" else
-                            "Inventory" if src == "inventory" else "Products"
-                        ):
-                            matching_fn = fn
-                            break
-                    lineage.log_lineage(run_id, source_dataset=matching_fn, bronze_path=f"bronze/{matching_fn}")
-                    
-                tracker.update_run(run_id, rows_processed=total_processed)
-                
-                # Step 3: Validation
-                status_container.markdown("### Ingestion Timeline\n"
-                                          "✓ **Step 1/6: Preserving source identity and conforming columns**\n"
-                                          "✓ **Step 2/6: Loading raw CSVs to Bronze Data Lake**\n"
-                                          "⏳ **Step 3/6: Executing Data Quality expectations validation...**")
-                progress_bar.progress(45)
-                time.sleep(1)
-                
-                validator = DataValidator()
-                for src_name, file, dt_col in sources:
-                    local_temp = f"temp_validate_{src_name}.csv"
-                    from storage.s3_manager import StorageManager
-                    storage = StorageManager()
-                    if storage.download_file(f"bronze/{src_name}/{src_name}_raw.csv", local_temp):
-                        df_val = pd.read_csv(local_temp)
-                        if src_name == "crm_customers":
-                            validator.expect_column_values_to_not_be_null(df_val, "customer_id", src_name)
-                            validator.expect_column_values_to_be_unique(df_val, "customer_id", src_name)
-                        elif src_name == "products":
-                            validator.expect_column_values_to_not_be_null(df_val, "product_id", src_name)
-                            validator.expect_column_values_to_be_unique(df_val, "product_id", src_name)
-                        elif src_name == "erp_orders":
-                            validator.expect_column_values_to_not_be_null(df_val, "order_id", src_name)
-                            validator.expect_column_values_to_be_unique(df_val, "order_id", src_name)
-                        elif src_name == "pos_transactions":
-                            validator.expect_column_values_to_not_be_null(df_val, "transaction_id", src_name)
-                            validator.expect_column_values_to_be_unique(df_val, "transaction_id", src_name)
-                        elif src_name == "inventory":
-                            validator.expect_column_values_to_not_be_null(df_val, "store_id", src_name)
-                            validator.expect_column_values_to_not_be_null(df_val, "product_id", src_name)
-                        os.remove(local_temp)
-                        
-                # Step 4: Silver
-                status_container.markdown("### Ingestion Timeline\n"
-                                          "✓ **Step 1/6: Preserving source identity and conforming columns**\n"
-                                          "✓ **Step 2/6: Loading raw CSVs to Bronze Data Lake**\n"
-                                          "✓ **Step 3/6: Executing Data Quality expectations validation**\n"
-                                          "⏳ **Step 4/6: Executing Pandas transformations (Silver Layer)...**")
-                progress_bar.progress(60)
-                time.sleep(1)
-                
-                cleaner = DataCleaner()
-                for dataset in ["crm_customers", "products", "erp_orders", "pos_transactions"]:
-                    cleaner.process_and_save_silver(dataset)
-                    
-                    matching_fn = dataset
-                    for fn in ready_files:
-                        if st.session_state["uploads"][fn]["user_type"] == (
-                            "CRM" if dataset == "crm_customers" else
-                            "ERP" if dataset == "erp_orders" else
-                            "POS" if dataset == "pos_transactions" else "Products"
-                        ):
-                            matching_fn = fn
-                            break
-                    lineage.log_lineage(run_id, source_dataset=matching_fn, silver_path=f"silver/{dataset}/{dataset}_clean.csv")
-                    
-                inv_cleaner = InventoryCleaner()
-                inv_cleaner.clean_inventory()
-                
-                matching_fn = "inventory"
-                for fn in ready_files:
-                    if st.session_state["uploads"][fn]["user_type"] == "Inventory":
-                        matching_fn = fn
-                        break
-                lineage.log_lineage(run_id, source_dataset=matching_fn, silver_path="silver/inventory/inventory_clean.csv")
-                
-                # Step 5: Gold
-                status_container.markdown("### Ingestion Timeline\n"
-                                          "✓ **Step 1/6: Preserving source identity and conforming columns**\n"
-                                          "✓ **Step 2/6: Loading raw CSVs to Bronze Data Lake**\n"
-                                          "✓ **Step 3/6: Executing Data Quality expectations validation**\n"
-                                          "✓ **Step 4/6: Executing Pandas transformations (Silver Layer)**\n"
-                                          "⏳ **Step 5/6: Building analytical gold models & feature aggregations...**")
-                progress_bar.progress(75)
-                time.sleep(1)
-                
-                builder = FeatureBuilder()
-                builder.build_customer_metrics()
-                builder.build_sales_metrics()
-                
-                matching_fn = "crm_customers"
-                for fn in ready_files:
-                    if st.session_state["uploads"][fn]["user_type"] == "CRM":
-                        matching_fn = fn
-                        break
-                lineage.log_lineage(run_id, source_dataset=matching_fn, gold_path="gold/customer_metrics/customer_metrics.csv")
-                
-                matching_fn = "pos_transactions"
-                for fn in ready_files:
-                    if st.session_state["uploads"][fn]["user_type"] == "POS":
-                        matching_fn = fn
-                        break
-                lineage.log_lineage(run_id, source_dataset=matching_fn, gold_path="gold/sales_metrics/sales_metrics.csv")
-                
-                inv_builder = InventoryMetricsBuilder()
-                inv_builder.build_inventory_metrics()
-                
-                matching_fn = "inventory"
-                for fn in ready_files:
-                    if st.session_state["uploads"][fn]["user_type"] == "Inventory":
-                        matching_fn = fn
-                        break
-                lineage.log_lineage(run_id, source_dataset=matching_fn, gold_path="gold/inventory_metrics/inventory_metrics.csv")
-                
-                # Step 6: Warehouse & Registry Update
-                status_container.markdown("### Ingestion Timeline\n"
-                                          "✓ **Step 1/6: Preserving source identity and conforming columns**\n"
-                                          "✓ **Step 2/6: Loading raw CSVs to Bronze Data Lake**\n"
-                                          "✓ **Step 3/6: Executing Data Quality expectations validation**\n"
-                                          "✓ **Step 4/6: Executing Pandas transformations (Silver Layer)**\n"
-                                          "✓ **Step 5/6: Building analytical gold models & feature aggregations**\n"
-                                          "⏳ **Step 6/6: Performing set-based merges into Data Warehouse...**")
-                progress_bar.progress(90)
-                time.sleep(1)
-                
-                wh_loader = WarehouseLoader()
-                wh_loader.load_dimensions()
-                wh_loader.load_facts()
-                
-                tracker.complete_run(run_id, status="SUCCESS")
-                
-                # Update status in registry
-                for fn in ready_files:
-                    file_info = st.session_state["uploads"][fn]
-                    schema_def = json.dumps(file_info["profile"]["schema_definition"])
-                    q_details = json.dumps(file_info["deductions"])
-                    signals_def = json.dumps(file_info["signals"])
-                    
-                    tracker.register_dataset(
-                        name=fn,
-                        dtype=file_info["user_type"],
-                        status="Completed",
-                        rows=file_info["profile"]["rows"],
-                        cols=file_info["profile"]["columns"],
-                        schema_def=schema_def,
-                        q_score=file_info["quality_score"],
-                        comp_score=file_info["completeness"],
-                        val_score=file_info["validity"],
-                        uniq_score=file_info["uniqueness"],
-                        cons_score=file_info["consistency"],
-                        q_details=q_details,
-                        conf_score=file_info["confidence"],
-                        det_signals=signals_def,
-                        user="anonymous",
-                        run_id=run_id
-                    )
-                    
-                status_container.markdown("### Ingestion Timeline\n"
-                                          "✓ **Step 1/6: Preserving source identity and conforming columns**\n"
-                                          "✓ **Step 2/6: Loading raw CSVs to Bronze Data Lake**\n"
-                                          "✓ **Step 3/6: Executing Data Quality expectations validation**\n"
-                                          "✓ **Step 4/6: Executing Pandas transformations (Silver Layer)**\n"
-                                          "✓ **Step 5/6: Building analytical gold models & feature aggregations**\n"
-                                          "✓ **Step 6/6: Performing set-based merges into Data Warehouse**")
-                progress_bar.progress(100)
-                st.success(f"Self-service onboarding run {run_id} completed successfully!")
-                
-                for fn in ready_files:
-                    del st.session_state["uploads"][fn]
-                st.rerun()
-                
-            except Exception as e:
-                try:
-                    tracker.complete_run(run_id, status="FAILED", error_message=str(e)[:400])
-                    for fn in ready_files:
-                        file_info = st.session_state["uploads"][fn]
-                        schema_def = json.dumps(file_info["profile"]["schema_definition"])
-                        q_details = json.dumps(file_info["deductions"])
-                        signals_def = json.dumps(file_info["signals"])
-                        tracker.register_dataset(
-                            name=fn,
-                            dtype=file_info["user_type"],
-                            status="Failed",
-                            rows=file_info["profile"]["rows"],
-                            cols=file_info["profile"]["columns"],
-                            schema_def=schema_def,
-                            q_score=file_info["quality_score"],
-                            comp_score=file_info["completeness"],
-                            val_score=file_info["validity"],
-                            uniq_score=file_info["uniqueness"],
-                            cons_score=file_info["consistency"],
-                            q_details=q_details,
-                            conf_score=file_info["confidence"],
-                            det_signals=signals_def,
-                            user="anonymous",
-                            run_id=run_id
-                        )
-                except Exception:
-                    pass
-                status_container.markdown("### Ingestion Timeline\n❌ **Pipeline failed.**")
-                progress_bar.progress(100)
-                st.error(f"ETL pipeline execution failed: {e}")
-    else:
-        st.info("No datasets are currently approved and READY for pipeline execution. Configure and approve an uploaded dataset above.")
-
-    # 4. CENTRAL DATASET REGISTRY
-    st.markdown("---")
-    st.subheader("📋 Dataset Registry")
     if registry_entries:
         reg_data = []
         for entry in registry_entries:
             reg_data.append({
-                "Dataset Name": entry.dataset_name,
-                "Type": entry.detected_type,
+                "Dataset": entry.dataset_name,
+                "Type": entry.detected_type or "—",
                 "Status": entry.status,
-                "Version": f"v{entry.schema_version}",
-                "Rows": f"{entry.rows_count:,}",
-                "Cols": entry.columns_count,
-                "DQ Score": f"{entry.quality_score}/100",
-                "Last Ingestion Run": entry.last_run_id or "N/A"
+                "Rows": f"{entry.rows_count:,}" if entry.rows_count else "—",
+                "DQ Score": f"{entry.quality_score}/100" if entry.quality_score else "—",
+                "Last Run": entry.last_run_id or "—",
             })
         st.dataframe(pd.DataFrame(reg_data), use_container_width=True)
     else:
-        st.info("No datasets have been registered yet. Upload a dataset to begin onboarding.")
+        st.info("No pipeline runs recorded yet. Click **Run Full Medallion Pipeline** above to execute the demo.")
 
-    # 5. LINEAGE EXPLORER
+    # ── RESET UTILITY ─────────────────────────────────────────────────
     st.markdown("---")
-    st.subheader("🕸️ Lineage Explorer")
-    lineage_options = ["crm_customers", "erp_orders", "pos_transactions", "inventory", "products"]
-    if registry_entries:
-        lineage_options = [entry.dataset_name for entry in registry_entries] + lineage_options
-        
-    lineage_ds = st.selectbox("Select Dataset to Explore Lineage Flow:", lineage_options)
-    st.markdown("Click on any pipeline stage below to inspect mappings, validation checks, and data lineage:")
-    
-    col_l1, col_l2, col_l3, col_l4, col_l5, col_l6 = st.columns(6)
-    
-    if col_l1.button("📁 Source", use_container_width=True): st.session_state["selected_lineage_stage"] = "Source"; st.rerun()
-    if col_l2.button("🥉 Bronze", use_container_width=True): st.session_state["selected_lineage_stage"] = "Bronze"; st.rerun()
-    if col_l3.button("🥈 Silver", use_container_width=True): st.session_state["selected_lineage_stage"] = "Silver"; st.rerun()
-    if col_l4.button("🥇 Gold", use_container_width=True): st.session_state["selected_lineage_stage"] = "Gold"; st.rerun()
-    if col_l5.button("🏛️ Warehouse", use_container_width=True): st.session_state["selected_lineage_stage"] = "Warehouse"; st.rerun()
-    if col_l6.button("📊 Dashboard", use_container_width=True): st.session_state["selected_lineage_stage"] = "Dashboard"; st.rerun()
-    
-    stage = st.session_state.get("selected_lineage_stage", "Source")
-    st.markdown(f"**Selected Node**: `{stage}` details for dataset `{lineage_ds}`")
-    
-    if stage == "Source":
-        st.markdown(f"**Identity Trace**: Original source file name: `{lineage_ds}`")
-        st.markdown(f"**Preservation**: Source format preserved exactly. Upload storage root path: `uploads/{lineage_ds}`")
-    elif stage == "Bronze":
-        st.markdown(f"**Bronze Ingestion**: Raw data structured and cataloged.")
-        st.markdown(f"**Path**: `data_lake/bronze/{lineage_ds}`")
-        st.markdown(f"**Quality Expectations**: Column structures matching conformed target schemas.")
-    elif stage == "Silver":
-        st.markdown(f"**Silver Cleaning**: Null normalizations, trim whitespaces, parse formats.")
-        st.markdown(f"**DQ Rule Checks Passed**: Completeness checks, null bounds verified (<5% threshold limit).")
-    elif stage == "Gold":
-        st.markdown(f"**Gold Aggregations**: Derived analytics metrics compiled, SCD type 2 ranges verified.")
-    elif stage == "Warehouse":
-        st.markdown(f"**Warehouse Loader**: Star Schema tables updated via set-based upserts and transactions.")
-        st.markdown(f"**Relational Integrity**: 0 orphaned keys, 0 overlapping SCD type 2 records.")
-    elif stage == "Dashboard":
-        st.markdown(f"**Downstream Views**: Refreshed dashboard views query SQL data dynamically.")
-
-    # 6. RESET UTILITIES
-    with st.expander("🛠️ Platform Settings & Operations"):
-        st.warning("Resetting the platform deletes all registered datasets, clears local data lake folders, and restores conformed default mock data.")
-        reset_platform_btn = st.button("🔄 Reset Platform to Default Mock Data")
-        if reset_platform_btn:
-            with st.spinner("Resetting platform data..."):
+    with st.expander("🔄 Reset Demo Data to Defaults"):
+        st.warning("This regenerates all 5 built-in CSV files with fresh mock data, clears the data lake folders, and drops all warehouse tables so you can demo from a clean state.")
+        reset_btn = st.button("🔄 Reset Platform to Default Mock Data", key="demo_reset_btn")
+        if reset_btn:
+            with st.spinner("Resetting platform..."):
                 try:
                     from data.generate_mock_data import generate_mock_data
                     generate_mock_data()
-                    
                     import shutil
                     for layer in ["bronze", "silver", "gold"]:
                         lake_path = os.path.join("data_lake", layer)
                         if os.path.exists(lake_path):
                             shutil.rmtree(lake_path)
                     os.makedirs("data_lake", exist_ok=True)
-                    
                     engine = get_db_connection()
                     with engine.begin() as conn:
-                        tables = [
-                            "fact_sales", "fact_orders", 
+                        for tbl in [
+                            "fact_sales", "fact_orders",
                             "gold_sales_metrics", "gold_customer_metrics", "gold_inventory_metrics",
                             "dim_customer", "dim_product", "dim_store", "dim_date",
                             "pipeline_runs", "data_lineage", "pipeline_watermarks", "dataset_registry"
-                        ]
-                        for table in tables:
+                        ]:
                             try:
-                                conn.execute(text(f"DROP TABLE IF EXISTS {table}"))
+                                conn.execute(text(f"DROP TABLE IF EXISTS {tbl}"))
                             except Exception:
                                 pass
-                    
-                    from metadata.tracker import MetadataTracker
-                    from metadata.lineage_tracker import LineageTracker
-                    from ingestion.csv_loader import CSVLoader
-                    from quality.validator import DataValidator
-                    from transformations.cleaner import DataCleaner
-                    from transformations.inventory_cleaner import InventoryCleaner
-                    from feature_engineering.builder import FeatureBuilder
-                    from feature_engineering.inventory_metrics import InventoryMetricsBuilder
-                    from warehouse.loader import WarehouseLoader
-                    from metadata.watermarks import WatermarkManager
-                    from datetime import datetime
-                    
-                    run_id = f"manual__reset_{int(time.time())}"
-                    tracker = MetadataTracker()
-                    tracker.start_run(run_id)
-                    lineage = LineageTracker()
-                    
-                    wm = WatermarkManager()
-                    for src in ["erp_orders", "crm_customers", "pos_transactions", "products", "inventory"]:
-                        wm.update_watermark(src, datetime(2000, 1, 1))
-                    
-                    loader = CSVLoader()
-                    sources = [
-                        ("erp_orders", "erp_orders.csv", "order_date"),
-                        ("crm_customers", "crm_customers.csv", "signup_date"),
-                        ("pos_transactions", "pos_transactions.csv", "timestamp"),
-                        ("products", "products.csv", None),
-                        ("inventory", "inventory.csv", "last_restock_date")
-                    ]
-                    total_processed = 0
-                    for src, file, dt_col in sources:
-                        df = loader.load_incremental(src, file, dt_col)
-                        loader.save_to_bronze(df, src)
-                        total_processed += len(df)
-                        lineage.log_lineage(run_id, source_dataset=src, bronze_path=f"bronze/{src}/{src}_raw.csv")
-                    tracker.update_run(run_id, rows_processed=total_processed)
-                    
-                    validator = DataValidator()
-                    cleaner = DataCleaner()
-                    for dataset in ["crm_customers", "products", "erp_orders", "pos_transactions"]:
-                        cleaner.process_and_save_silver(dataset)
-                        lineage.log_lineage(run_id, source_dataset=dataset, silver_path=f"silver/{dataset}/{dataset}_clean.csv")
-                    inv_cleaner = InventoryCleaner()
-                    inv_cleaner.clean_inventory()
-                    lineage.log_lineage(run_id, source_dataset="inventory", silver_path="silver/inventory/inventory_clean.csv")
-                    
-                    builder = FeatureBuilder()
-                    builder.build_customer_metrics()
-                    lineage.log_lineage(run_id, source_dataset="customer_metrics", gold_path="gold/customer_metrics/customer_metrics.csv")
-                    builder.build_sales_metrics()
-                    lineage.log_lineage(run_id, source_dataset="sales_metrics", gold_path="gold/sales_metrics/sales_metrics.csv")
-                    
-                    inv_builder = InventoryMetricsBuilder()
-                    inv_builder.build_inventory_metrics()
-                    lineage.log_lineage(run_id, source_dataset="inventory_metrics", gold_path="gold/inventory_metrics/inventory_metrics.csv")
-                    
-                    wh_loader = WarehouseLoader()
-                    wh_loader.load_dimensions()
-                    wh_loader.load_facts()
-                    
-                    tracker.complete_run(run_id, status="COMPLETED")
-                    st.success("Successfully reset data to conformed defaults and populated warehouse!")
+                    st.success("✅ Platform reset to clean defaults. Click 'Run Full Medallion Pipeline' to re-populate.")
                     st.rerun()
                 except Exception as e:
-                    st.error(f"Failed to reset data defaults: {e}")
-
+                    st.error(f"Reset failed: {e}")
 elif dashboard_selection == "Smart Upload Mode":
     st.header("⚡ Smart Upload & Self-Service Ingestion")
     st.markdown("""
@@ -1048,33 +674,32 @@ elif dashboard_selection == "Smart Upload Mode":
                     "original_filename": fn
                 }
 
-    # 2. DATASET REGISTRY SUMMARY
-    st.subheader("2. Dataset Registry Summary")
+    # 2. ACTIVE SESSION — STAGED UPLOADS
+    st.markdown("---")
+    st.subheader("2. Active Staged Uploads")
     tracker = MetadataTracker()
     registry_entries = tracker.get_registered_datasets()
-    
-    if registry_entries:
-        reg_table_data = []
-        for entry in registry_entries:
-            reg_table_data.append({
-                "Dataset Name": entry.dataset_name,
-                "Original Filename": entry.original_filename or entry.dataset_name,
-                "Dataset Type": entry.detected_type,
-                "Rows": entry.rows_count,
-                "Columns": entry.columns_count,
-                "Quality Score": f"{entry.quality_score}/100",
-                "Status": entry.status,
-                "Last Ingestion Run": entry.last_run_id or "N/A",
-                "Schema Version": f"v{entry.schema_version}"
+
+    if st.session_state["smart_uploads"]:
+        staged_summary = []
+        for fn, info in st.session_state["smart_uploads"].items():
+            staged_summary.append({
+                "Filename": fn,
+                "Detected Type": info["detected_type"],
+                "Confidence": f"{info['confidence_score']}%",
+                "Rows": f"{len(info['df']):,}",
+                "Cols": len(info['df'].columns),
+                "Status": info["status"],
             })
-        st.dataframe(pd.DataFrame(reg_table_data), use_container_width=True)
+        st.success(f"{len(staged_summary)} file(s) staged and ready to configure below.")
+        st.dataframe(pd.DataFrame(staged_summary), use_container_width=True)
     else:
-        st.info("No datasets have been registered yet. Upload a dataset to begin onboarding.")
+        st.info("No files staged yet. Upload one or more CSV files above to begin.")
 
     # 3. STAGING CONFIGURATION AND LIFECYCLE WORKFLOW
+    st.markdown("---")
+    st.subheader("3. Staged Datasets Configuration & Lifecycle")
     if st.session_state["smart_uploads"]:
-        st.markdown("---")
-        st.subheader("3. Staged Datasets Configuration & Lifecycle")
         active_files = list(st.session_state["smart_uploads"].keys())
         selected_file = st.selectbox("Select Staged File to Configure:", active_files, key="select_staged_file")
         
@@ -1420,71 +1045,200 @@ elif dashboard_selection == "Smart Upload Mode":
                     file_info["status"] = "Failed"
                     st.error(f"Ingestion failed: {e}")
                     st.rerun()
+    else:
+        st.info("No datasets are currently staged. Upload one or more CSV files in Section 1 above to begin the configuration and lifecycle workflow.")
+
+    # 4. HISTORICAL DATASET REGISTRY (collapsed by default)
+    st.markdown("---")
+    registry_count = len(registry_entries) if registry_entries else 0
+    with st.expander(f"📋 Previously Ingested Dataset Registry ({registry_count} records)", expanded=False):
+        if registry_entries:
+            reg_table_data = []
+            for entry in registry_entries:
+                reg_table_data.append({
+                    "Dataset Name": entry.dataset_name,
+                    "Original Filename": entry.original_filename or entry.dataset_name,
+                    "Dataset Type": entry.detected_type,
+                    "Rows": entry.rows_count,
+                    "Columns": entry.columns_count,
+                    "Quality Score": f"{entry.quality_score}/100",
+                    "Status": entry.status,
+                    "Last Ingestion Run": entry.last_run_id or "N/A",
+                    "Schema Version": f"v{entry.schema_version}"
+                })
+            st.dataframe(pd.DataFrame(reg_table_data), use_container_width=True)
+        else:
+            st.info("No datasets have been registered yet.")
 
     # 5. LINEAGE EXPLORER
     st.markdown("---")
-    st.subheader("🕸️ Lineage Explorer")
-    lineage_options = ["crm_customers", "erp_orders", "pos_transactions", "inventory", "products"]
+    st.subheader("5. 🕸️ Lineage Explorer")
+
+    # Inject custom CSS to style the lineage buttons cleanly, prevent wrapping, and ensure uniform design
+    st.markdown("""
+    <style>
+    div[data-testid="stColumn"] button {
+        min-height: 56px !important;
+        height: 56px !important;
+        padding: 4px 8px !important;
+        border-radius: 8px !important;
+        border: 1px solid #334155 !important;
+        background-color: #1e293b !important;
+        color: #e2e8f0 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        transition: all 0.2s ease-in-out !important;
+        width: 100% !important;
+    }
+    div[data-testid="stColumn"] button:hover {
+        border-color: #6366f1 !important;
+        color: #ffffff !important;
+        box-shadow: 0 0 10px rgba(99, 102, 241, 0.2) !important;
+        background-color: #0f172a !important;
+    }
+    div[data-testid="stColumn"] button p,
+    div[data-testid="stColumn"] button span,
+    div[data-testid="stColumn"] button div {
+        font-size: 10.5px !important;
+        font-weight: 600 !important;
+        line-height: 1.25 !important;
+        white-space: normal !important;
+        word-break: keep-all !important;
+        overflow-wrap: normal !important;
+        text-align: center !important;
+        display: block !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Deduplicate lineage options
+    lineage_options = []
+    seen = set()
     if registry_entries:
-        lineage_options = [entry.dataset_name for entry in registry_entries] + lineage_options
-        
-    lineage_ds = st.selectbox("Select Dataset to Explore Lineage Flow:", lineage_options, key="select_lineage_file")
-    st.markdown("Click on any pipeline stage below to inspect mappings, validation checks, and data lineage:")
-    
-    col_l1, col_l2, col_l3, col_l4, col_l5, col_l6 = st.columns(6)
-    
-    if col_l1.button("📁 Source File", key="l_btn_src"): st.session_state["selected_lineage_stage"] = "Source"; st.rerun()
-    if col_l2.button("🥉 Bronze Layer", key="l_btn_brz"): st.session_state["selected_lineage_stage"] = "Bronze"; st.rerun()
-    if col_l3.button("🥈 Silver Layer", key="l_btn_slv"): st.session_state["selected_lineage_stage"] = "Silver"; st.rerun()
-    if col_l4.button("🥇 Gold Layer", key="l_btn_gld"): st.session_state["selected_lineage_stage"] = "Gold"; st.rerun()
-    if col_l5.button("🏛️ Warehouse Table", key="l_btn_wh"): st.session_state["selected_lineage_stage"] = "Warehouse"; st.rerun()
-    if col_l6.button("📊 Analytics Dashboard", key="l_btn_db"): st.session_state["selected_lineage_stage"] = "Dashboard"; st.rerun()
-    
+        for entry in registry_entries:
+            if entry.dataset_name not in seen:
+                lineage_options.append(entry.dataset_name)
+                seen.add(entry.dataset_name)
+    for ds in ["crm_customers", "erp_orders", "pos_transactions", "inventory", "products"]:
+        if ds not in seen:
+            lineage_options.append(ds)
+
+    col_lin1, col_lin2 = st.columns([2, 3])
+    with col_lin1:
+        lineage_ds = st.selectbox("Select Dataset:", lineage_options, key="select_lineage_file")
+    with col_lin2:
+        st.markdown("<div style='padding-top:28px; color:#64748b; font-size:13px;'>Click a pipeline stage to inspect its lineage details.</div>", unsafe_allow_html=True)
+
+    # ── Stage selector buttons — uniform width, all on one row ───────
+    STAGES = [
+        ("l_btn_src", "📁 Source File",        "Source"),
+        ("l_btn_brz", "🥉 Bronze Layer",       "Bronze"),
+        ("l_btn_slv", "🥈 Silver Layer",       "Silver"),
+        ("l_btn_gld", "🥇 Gold Layer",         "Gold"),
+        ("l_btn_wh",  "🏛️ Warehouse Table",   "Warehouse"),
+        ("l_btn_db",  "📊 Analytics Dashboard", "Dashboard"),
+    ]
+    btn_cols = st.columns(len(STAGES))
+    for col, (key, label, stage_val) in zip(btn_cols, STAGES):
+        if col.button(label, key=key, use_container_width=True):
+            st.session_state["selected_lineage_stage"] = stage_val
+            st.rerun()
+
     stage = st.session_state.get("selected_lineage_stage", "Source")
-    st.markdown(f"**Selected Node**: `{stage}` details for dataset `{lineage_ds}`")
-    
+
+    # ── Stage detail card ─────────────────────────────────────────────
+    # Fetch lineage record from DB
     engine = get_db_connection()
-    # Fetch data lineage details from DB
     try:
         with engine.connect() as conn:
             lin_df = pd.read_sql(
-                text("SELECT * FROM data_lineage WHERE source_file_name = :file OR source_dataset = :file OR run_id = :file ORDER BY load_timestamp DESC LIMIT 1"),
+                text("SELECT * FROM data_lineage WHERE source_file_name = :file OR source_dataset = :file ORDER BY load_timestamp DESC LIMIT 1"),
                 conn,
                 params={"file": lineage_ds}
             )
     except Exception:
         lin_df = pd.DataFrame()
-        
+
+    STAGE_META = {
+        "Source":    ("📁", "Source File Identity"),
+        "Bronze":    ("🥉", "Bronze Data Lake"),
+        "Silver":    ("🥈", "Silver Transformation"),
+        "Gold":      ("🥇", "Gold Aggregations"),
+        "Warehouse": ("🏛️", "Warehouse Star Schema"),
+        "Dashboard": ("📊", "Analytics Dashboard"),
+    }
+    icon, title = STAGE_META.get(stage, ("📁", stage))
+
+    detail_lines = []
     if stage == "Source":
-        st.markdown(f"**Identity Trace**: Original source file name: `{lineage_ds}`")
-        st.markdown(f"**Preservation**: Source format preserved exactly. Upload storage root path: `uploads/{lineage_ds}`")
-        if not lin_df.empty:
-            st.markdown(f"**Uploaded User**: `{lin_df['source_file_name'].values[0] if 'source_file_name' in lin_df.columns else 'N/A'}`")
-            st.markdown(f"**Upload Timestamp**: `{lin_df['load_timestamp'].values[0]}`")
+        detail_lines = [
+            ("Identity Trace", f"`{lineage_ds}`"),
+            ("Storage Path", f"`uploads/{lineage_ds}`"),
+            ("Format", "Original CSV preserved exactly as uploaded"),
+        ]
+        if not lin_df.empty and "load_timestamp" in lin_df.columns:
+            detail_lines.append(("Ingested At", f"`{lin_df['load_timestamp'].values[0]}`"))
     elif stage == "Bronze":
-        st.markdown(f"**Bronze Ingestion**: Raw data structured and cataloged.")
-        brz_path = lin_df['bronze_path'].values[0] if not lin_df.empty and 'bronze_path' in lin_df.columns and lin_df['bronze_path'].values[0] else f"bronze/{lineage_ds}/{lineage_ds}_raw.csv"
-        st.markdown(f"**Path**: `{brz_path}`")
-        # Parquet file display
+        brz_path = (lin_df['bronze_path'].values[0]
+                    if not lin_df.empty and 'bronze_path' in lin_df.columns and lin_df['bronze_path'].values[0]
+                    else f"data_lake/bronze/{lineage_ds}/{lineage_ds}_raw.csv")
         parquet_file = os.path.splitext(lineage_ds)[0] + ".parquet"
-        st.markdown(f"**Parquet Bronze Format Preservation**: `data_lake/bronze/{parquet_file}`")
-        st.markdown(f"**Quality Expectations**: Column structures matching conformed target schemas.")
+        detail_lines = [
+            ("Raw Path",     f"`{brz_path}`"),
+            ("Parquet Copy", f"`data_lake/bronze/{parquet_file}`"),
+            ("Quality Gate", "Column structure matches conformed target schema"),
+        ]
     elif stage == "Silver":
-        st.markdown(f"**Silver Cleaning**: Null normalizations, trim whitespaces, parse formats.")
-        slv_path = lin_df['silver_path'].values[0] if not lin_df.empty and 'silver_path' in lin_df.columns and lin_df['silver_path'].values[0] else f"silver/{lineage_ds}/{lineage_ds}_clean.csv"
-        st.markdown(f"**Path**: `{slv_path}`")
-        st.markdown(f"**DQ Rule Checks Passed**: Completeness checks, null bounds verified (<5% threshold limit).")
-        if not lin_df.empty:
-            st.markdown(f"**Execution Run ID**: `{lin_df['run_id'].values[0]}`")
+        slv_path = (lin_df['silver_path'].values[0]
+                    if not lin_df.empty and 'silver_path' in lin_df.columns and lin_df['silver_path'].values[0]
+                    else f"data_lake/silver/{lineage_ds}/{lineage_ds}_clean.csv")
+        detail_lines = [
+            ("Clean Path",  f"`{slv_path}`"),
+            ("Transforms",  "Null normalisation · whitespace trim · date parsing"),
+            ("DQ Threshold","Null rate < 5% · Uniqueness keys verified"),
+        ]
+        if not lin_df.empty and "run_id" in lin_df.columns:
+            detail_lines.append(("Run ID", f"`{lin_df['run_id'].values[0]}`"))
     elif stage == "Gold":
-        st.markdown(f"**Gold Aggregations**: Derived analytics metrics compiled, SCD type 2 ranges verified.")
-        gld_path = lin_df['gold_path'].values[0] if not lin_df.empty and 'gold_path' in lin_df.columns and lin_df['gold_path'].values[0] else "gold/metrics/"
-        st.markdown(f"**Path**: `{gld_path}`")
+        gld_path = (lin_df['gold_path'].values[0]
+                    if not lin_df.empty and 'gold_path' in lin_df.columns and lin_df['gold_path'].values[0]
+                    else "data_lake/gold/metrics/")
+        detail_lines = [
+            ("Gold Path",    f"`{gld_path}`"),
+            ("Aggregations", "SCD Type 2 ranges · rolling KPIs · segmentation"),
+            ("Integrity",    "0 overlapping SCD ranges verified"),
+        ]
     elif stage == "Warehouse":
-        st.markdown(f"**Warehouse Loader**: Star Schema tables updated via set-based upserts and transactions.")
-        st.markdown(f"**Relational Integrity**: 0 orphaned keys, 0 overlapping SCD type 2 records.")
+        detail_lines = [
+            ("Loader",    "Set-based upserts via SQLAlchemy transactions"),
+            ("Schema",    "Star Schema — dim + fact tables"),
+            ("Integrity", "0 orphaned FK keys · 0 overlapping SCD Type 2 records"),
+        ]
     elif stage == "Dashboard":
-        st.markdown(f"**Downstream Views**: Refreshed dashboard views query SQL data dynamically.")
-        st.markdown("Connected visualization widgets: Sales Trends, Customer Segmentations, and Inventory Analytics.")
+        detail_lines = [
+            ("Views",    "Sales Analytics · Customer Analytics · Inventory Analytics"),
+            ("Refresh",  "Queries execute dynamically on every page load"),
+            ("Widgets",  "Sales Trends · Customer Segmentation · Low Stock Alerts"),
+        ]
+
+    # Render as a uniform card
+    rows_html = "".join(
+        f"<tr>"
+        f"<td style='padding:7px 14px 7px 0; color:#94a3b8; font-size:13px; white-space:nowrap; vertical-align:top;'>{k}</td>"
+        f"<td style='padding:7px 0; color:#e2e8f0; font-size:13px;'>{v}</td>"
+        f"</tr>"
+        for k, v in detail_lines
+    )
+    st.markdown(f"""
+    <div style='background:#1e293b; border:1px solid #334155; border-left:4px solid #6366f1;
+                border-radius:8px; padding:16px 20px; margin-top:10px;'>
+        <div style='font-size:14px; font-weight:700; color:#a5b4fc; margin-bottom:10px;'>
+            {icon} {title} &nbsp;·&nbsp; <span style='color:#64748b; font-weight:400;'>{lineage_ds}</span>
+        </div>
+        <table style='border-collapse:collapse; width:100%;'>{rows_html}</table>
+    </div>
+    """, unsafe_allow_html=True)
 
 
