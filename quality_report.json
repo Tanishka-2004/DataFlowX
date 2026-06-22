@@ -1,0 +1,227 @@
+{
+    "validation_time": "2026-06-22T09:03:55.667206",
+    "results": [
+        {
+            "dataset": "crm_customers",
+            "expectation": "schema matches expected columns",
+            "passed": true,
+            "details": ""
+        },
+        {
+            "dataset": "crm_customers",
+            "expectation": "customer_id not null",
+            "passed": true,
+            "details": "Found 0 nulls"
+        },
+        {
+            "dataset": "crm_customers",
+            "expectation": "customer_id unique",
+            "passed": true,
+            "details": "Found 0 duplicates"
+        },
+        {
+            "dataset": "crm_customers",
+            "expectation": "customer_name null percent <= 5.0%",
+            "passed": true,
+            "details": "Actual null percent: 0.00% (0 nulls)"
+        },
+        {
+            "dataset": "crm_customers",
+            "expectation": "segment null percent <= 5.0%",
+            "passed": true,
+            "details": "Actual null percent: 0.00% (0 nulls)"
+        },
+        {
+            "dataset": "crm_customers",
+            "expectation": "acquisition_channel null percent <= 5.0%",
+            "passed": true,
+            "details": "Actual null percent: 0.00% (0 nulls)"
+        },
+        {
+            "dataset": "crm_customers",
+            "expectation": "signup_date null percent <= 5.0%",
+            "passed": true,
+            "details": "Actual null percent: 0.00% (0 nulls)"
+        },
+        {
+            "dataset": "products",
+            "expectation": "schema matches expected columns",
+            "passed": true,
+            "details": ""
+        },
+        {
+            "dataset": "products",
+            "expectation": "product_id not null",
+            "passed": true,
+            "details": "Found 0 nulls"
+        },
+        {
+            "dataset": "products",
+            "expectation": "product_id unique",
+            "passed": true,
+            "details": "Found 0 duplicates"
+        },
+        {
+            "dataset": "products",
+            "expectation": "product_name null percent <= 5.0%",
+            "passed": true,
+            "details": "Actual null percent: 0.00% (0 nulls)"
+        },
+        {
+            "dataset": "products",
+            "expectation": "category null percent <= 5.0%",
+            "passed": true,
+            "details": "Actual null percent: 0.00% (0 nulls)"
+        },
+        {
+            "dataset": "products",
+            "expectation": "unit_price null percent <= 5.0%",
+            "passed": true,
+            "details": "Actual null percent: 0.00% (0 nulls)"
+        },
+        {
+            "dataset": "products",
+            "expectation": "unit_price between 0 and 10000",
+            "passed": true,
+            "details": "Found 0 out of range values"
+        },
+        {
+            "dataset": "erp_orders",
+            "expectation": "schema matches expected columns",
+            "passed": true,
+            "details": ""
+        },
+        {
+            "dataset": "erp_orders",
+            "expectation": "order_id not null",
+            "passed": true,
+            "details": "Found 0 nulls"
+        },
+        {
+            "dataset": "erp_orders",
+            "expectation": "order_id unique",
+            "passed": true,
+            "details": "Found 0 duplicates"
+        },
+        {
+            "dataset": "erp_orders",
+            "expectation": "quantity null percent <= 5.0%",
+            "passed": true,
+            "details": "Actual null percent: 0.00% (0 nulls)"
+        },
+        {
+            "dataset": "erp_orders",
+            "expectation": "order_date null percent <= 5.0%",
+            "passed": true,
+            "details": "Actual null percent: 0.00% (0 nulls)"
+        },
+        {
+            "dataset": "erp_orders",
+            "expectation": "region null percent <= 5.0%",
+            "passed": true,
+            "details": "Actual null percent: 0.00% (0 nulls)"
+        },
+        {
+            "dataset": "erp_orders",
+            "expectation": "unit_price null percent <= 5.0%",
+            "passed": true,
+            "details": "Actual null percent: 0.00% (0 nulls)"
+        },
+        {
+            "dataset": "erp_orders",
+            "expectation": "quantity between 0 and 1000",
+            "passed": true,
+            "details": "Found 0 out of range values"
+        },
+        {
+            "dataset": "pos_transactions",
+            "expectation": "schema matches expected columns",
+            "passed": true,
+            "details": ""
+        },
+        {
+            "dataset": "pos_transactions",
+            "expectation": "transaction_id not null",
+            "passed": true,
+            "details": "Found 0 nulls"
+        },
+        {
+            "dataset": "pos_transactions",
+            "expectation": "transaction_id unique",
+            "passed": true,
+            "details": "Found 0 duplicates"
+        },
+        {
+            "dataset": "pos_transactions",
+            "expectation": "quantity null percent <= 5.0%",
+            "passed": true,
+            "details": "Actual null percent: 0.00% (0 nulls)"
+        },
+        {
+            "dataset": "pos_transactions",
+            "expectation": "timestamp null percent <= 5.0%",
+            "passed": true,
+            "details": "Actual null percent: 0.00% (0 nulls)"
+        },
+        {
+            "dataset": "pos_transactions",
+            "expectation": "sale_amount null percent <= 5.0%",
+            "passed": true,
+            "details": "Actual null percent: 0.00% (0 nulls)"
+        },
+        {
+            "dataset": "pos_transactions",
+            "expectation": "sale_amount between 0 and 100000",
+            "passed": true,
+            "details": "Found 0 out of range values"
+        },
+        {
+            "dataset": "inventory",
+            "expectation": "schema matches expected columns",
+            "passed": true,
+            "details": ""
+        },
+        {
+            "dataset": "inventory",
+            "expectation": "store_id not null",
+            "passed": true,
+            "details": "Found 0 nulls"
+        },
+        {
+            "dataset": "inventory",
+            "expectation": "product_id not null",
+            "passed": true,
+            "details": "Found 0 nulls"
+        },
+        {
+            "dataset": "inventory",
+            "expectation": "composite_key unique",
+            "passed": true,
+            "details": "Found 0 duplicates"
+        },
+        {
+            "dataset": "inventory",
+            "expectation": "stock_level null percent <= 5.0%",
+            "passed": true,
+            "details": "Actual null percent: 0.00% (0 nulls)"
+        },
+        {
+            "dataset": "inventory",
+            "expectation": "reorder_point null percent <= 5.0%",
+            "passed": true,
+            "details": "Actual null percent: 0.00% (0 nulls)"
+        },
+        {
+            "dataset": "inventory",
+            "expectation": "last_restock_date null percent <= 5.0%",
+            "passed": true,
+            "details": "Actual null percent: 0.00% (0 nulls)"
+        },
+        {
+            "dataset": "inventory",
+            "expectation": "stock_level between 0 and 100000",
+            "passed": true,
+            "details": "Found 0 out of range values"
+        }
+    ]
+}
