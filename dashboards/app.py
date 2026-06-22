@@ -682,7 +682,7 @@ elif dashboard_selection == "Upload Data & Pipeline (Demo Mode)":
                 
                 cleaner = DataCleaner()
                 for dataset in ["crm_customers", "products", "erp_orders", "pos_transactions"]:
-                    cleaner.clean_dataset(dataset)
+                    cleaner.process_and_save_silver(dataset)
                     
                     matching_fn = dataset
                     for fn in ready_files:
@@ -965,7 +965,7 @@ elif dashboard_selection == "Upload Data & Pipeline (Demo Mode)":
                     validator = DataValidator()
                     cleaner = DataCleaner()
                     for dataset in ["crm_customers", "products", "erp_orders", "pos_transactions"]:
-                        cleaner.clean_dataset(dataset)
+                        cleaner.process_and_save_silver(dataset)
                         lineage.log_lineage(run_id, source_dataset=dataset, silver_path=f"silver/{dataset}/{dataset}_clean.csv")
                     inv_cleaner = InventoryCleaner()
                     inv_cleaner.clean_inventory()
